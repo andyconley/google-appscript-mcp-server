@@ -49,6 +49,7 @@ This fork keeps the full upstream toolset and adds the following. See the [fork 
 - **`publish_web_app`** — one call to publish a web app: optionally update content, create a version, and repoint an existing deployment to it (the deployment URL stays stable). Wraps the manual `update_script_content` → `versions.create` → `deployments.update` flow so it can't be left half-done.
 - **`get_web_app_url`** — return the `/exec` URL(s) and access config (`access`, `executeAs`, version) for a project's deployments.
 - **`list_script_projects`** — discover Apps Script projects via the Drive API (the Apps Script API has no "list my projects"). Returns each project's `scriptId` and name. **Requires the `drive.metadata.readonly` scope** — re-run OAuth setup to re-consent before it works (see [Re-consenting for new scopes](#re-consenting-for-new-scopes)).
+- **`recent_executions`** — list a project's recent runs (function, status, type, start time, duration) with an `onlyFailures` filter. Uses execution metadata — no extra scope, and does **not** include `console.log` output (that lives in Cloud Logging).
 
 **Fixes to existing tools**
 - **`script_run`** now actually runs a function. It previously sent an empty POST body (no `function`), so it could never execute anything. It now accepts `functionName`, `parameters`, and `devMode`.
@@ -501,6 +502,14 @@ These tools are added by this fork (see [What This Fork Adds](#-what-this-fork-a
 **Parameters**: `nameContains` (optional), `pageSize` (optional), `pageToken` (optional)
 **Note**: Requires the `drive.metadata.readonly` scope — see [Re-consenting for new scopes](#re-consenting-for-new-scopes).
 
+#### `recent_executions`
+**Purpose**: List a project's recent executions (runs) — function, status, type, start time, duration — with a `failures` count. The "what ran and did it fail" view. Uses execution metadata only; does **not** return `console.log` output.
+**Parameters**:
+- `scriptId` (required): The script project ID
+- `onlyFailures` (optional): Only return failed / timed-out / canceled runs
+- `functionName` (optional): Filter to a specific function
+- `pageSize` (optional), `pageToken` (optional)
+
 ### Dev / Diagnostic Tools
 
 Hidden unless `DEV_TOOLS=1` (see [Environment Variables](#environment-variables)).
@@ -522,6 +531,7 @@ Hidden unless `DEV_TOOLS=1` (see [Environment Variables](#environment-variables)
 | **Monitoring** | processes-list, get-metrics | Monitor execution and performance |
 | **Fork: Web App** | publish_web_app, get_web_app_url | Publish and inspect web app deployments |
 | **Fork: Discovery** | list_script_projects | Find projects by name (Drive) |
+| **Fork: Monitoring** | recent_executions | Recent runs + failures (execution metadata) |
 | **Fork: Dev** *(DEV_TOOLS=1)* | auth_status, server_info, reload_tools | Diagnostics and hot-reload |
 
 ### OAuth Scopes Reference
@@ -549,6 +559,7 @@ Which scope each tool needs. Scopes are per Google's Apps Script API reference (
 | `publish_web_app` *(fork)* | updateContent + versions.create + deployments.update | `script.projects` + `script.deployments` (web-app entry points also use `script.webapp.deploy`) |
 | `get_web_app_url` *(fork)* | deployments.get/list | `script.deployments.readonly` |
 | `list_script_projects` *(fork)* | Drive files.list | `drive.metadata.readonly` |
+| `recent_executions` *(fork)* | processes.listScriptProcesses | `script.processes` |
 | `auth_status`, `server_info`, `reload_tools` *(fork, dev)* | local only | none |
 
 **Least-privilege presets:**
