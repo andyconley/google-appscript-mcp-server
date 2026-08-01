@@ -1,3 +1,4 @@
+import { getAuthHeaders } from '../../../lib/oauth-helper.js';
 import { logger } from '../../../lib/logger.js';
 
 /**
@@ -10,16 +11,13 @@ import { logger } from '../../../lib/logger.js';
  */
 const executeFunction = async ({ scriptId, deploymentId }) => {
   const baseUrl = 'https://script.googleapis.com';
-  const accessToken = ''; // will be provided by the user
   try {
     // Construct the URL for the DELETE request
-    const url = `${baseUrl}/v1/projects/${scriptId}/deployments/${deploymentId}?fields=occaecat dolor eu&alt=json&$.xgafv=1&upload_protocol=occaecat dolor eu&uploadType=occaecat dolor eu&quotaUser=occaecat dolor eu&callback=occaecat dolor eu&prettyPrint=true`;
+    const url = `${baseUrl}/v1/projects/${scriptId}/deployments/${deploymentId}?prettyPrint=true`;
 
-    // Set up headers for the request
-    const headers = {
-      'Authorization': `Bearer ${accessToken}`,
-      'Accept': 'application/json'
-    };
+    // Set up headers for the request (OAuth, matching the working read/create tools)
+    const headers = await getAuthHeaders();
+    headers['Accept'] = 'application/json';
 
     // Perform the fetch request
     const response = await fetch(url, {

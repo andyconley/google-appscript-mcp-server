@@ -1,3 +1,4 @@
+import { getAuthHeaders } from '../../../lib/oauth-helper.js';
 import { logger } from '../../../lib/logger.js';
 
 /**
@@ -18,36 +19,17 @@ import { logger } from '../../../lib/logger.js';
  */
 const executeFunction = async ({ scriptId, versionNumber, fields, alt = 'json', key, access_token, quotaUser, oauth_token, callback, prettyPrint = true }) => {
   const baseUrl = 'https://script.googleapis.com';
-  const token = process.env.GOOGLE_APP_SCRIPT_API_API_KEY;
   const url = new URL(`${baseUrl}/v1/projects/${scriptId}/versions/${versionNumber}`);
 
   // Append query parameters
-  const params = new URLSearchParams({
-    fields,
-    alt,
-    key,
-    access_token,
-    quotaUser,
-    oauth_token,
-    callback,
-    prettyPrint: prettyPrint.toString(),
-    '$.xgafv': '1',
-    upload_protocol: 'raw',
-    uploadType: 'media'
-  });
-
-  // Set up headers for the request
-  const headers = {
-    'Accept': 'application/json'
-  };
-
-  // If a token is provided, add it to the Authorization header
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+  const params = new URLSearchParams({ prettyPrint: prettyPrint.toString() });
+  if (fields) params.append('fields', fields);
 
   // Perform the fetch request
   try {
+    // Set up headers for the request (OAuth, matching the working read/create tools)
+    const headers = await getAuthHeaders();
+
     const response = await fetch(`${url}?${params.toString()}`, {
       method: 'GET',
       headers

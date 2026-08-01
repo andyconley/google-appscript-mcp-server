@@ -1,3 +1,4 @@
+import { getAuthHeaders } from '../../../lib/oauth-helper.js';
 import { logger } from '../../../lib/logger.js';
 
 /**
@@ -14,8 +15,6 @@ import { logger } from '../../../lib/logger.js';
  */
 const executeFunction = async ({ scriptId, deploymentId, deploymentConfig }) => {
   const baseUrl = 'https://script.googleapis.com';
-  const token = process.env.GOOGLE_APP_SCRIPT_API_API_KEY;
-  const apiKey = process.env.GOOGLE_APP_SCRIPT_API_API_KEY;
   const startTime = Date.now();
 
   try {
@@ -26,14 +25,12 @@ const executeFunction = async ({ scriptId, deploymentId, deploymentConfig }) => 
     });
 
     // Construct the URL for the request
-    const url = `${baseUrl}/v1/projects/${scriptId}/deployments/${deploymentId}?key=${apiKey}&prettyPrint=true`;
+    const url = `${baseUrl}/v1/projects/${scriptId}/deployments/${deploymentId}?prettyPrint=true`;
 
-    // Set up headers for the request
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
+    // Set up headers for the request (OAuth, matching the working read/create tools)
+    const headers = await getAuthHeaders();
+    headers['Content-Type'] = 'application/json';
+    headers['Accept'] = 'application/json';
 
     // Prepare the body of the request
     const requestBody = { deploymentConfig };
@@ -92,7 +89,7 @@ const executeFunction = async ({ scriptId, deploymentId, deploymentConfig }) => 
       duration: Date.now() - startTime
     });
     
-    console.log('✅ Successfully updated deployment');
+    console.error('✅ Successfully updated deployment');
     return data;
   } catch (error) {
     const errorDetails = {

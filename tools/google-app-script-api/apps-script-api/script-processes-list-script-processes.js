@@ -1,3 +1,4 @@
+import { getAuthHeaders } from '../../../lib/oauth-helper.js';
 import { logger } from '../../../lib/logger.js';
 
 /**
@@ -18,7 +19,6 @@ import { logger } from '../../../lib/logger.js';
  */
 const executeFunction = async ({ scriptId, pageSize = 100, functionName, pageToken, startTime, endTime, deploymentId, types, statuses, userAccessLevels }) => {
   const baseUrl = 'https://script.googleapis.com';
-  const accessToken = ''; // will be provided by the user
   const startTimeMs = Date.now();
   
   try {
@@ -45,11 +45,8 @@ const executeFunction = async ({ scriptId, pageSize = 100, functionName, pageTok
       queryParams: Object.fromEntries(url.searchParams)
     });
 
-    // Set up headers for the request
-    const headers = {
-      'Authorization': `Bearer ${accessToken}`,
-      'Accept': 'application/json'
-    };
+    // Set up headers for the request (OAuth, matching the working read/create tools)
+    const headers = await getAuthHeaders();
 
     logger.logAPICall('GET', url.toString(), headers);
 
@@ -102,7 +99,7 @@ const executeFunction = async ({ scriptId, pageSize = 100, functionName, pageTok
       duration: Date.now() - startTimeMs
     });
     
-    console.log('✅ Successfully retrieved script processes');
+    console.error('✅ Successfully retrieved script processes');
     return data;
   } catch (error) {
     const errorDetails = {

@@ -1,3 +1,4 @@
+import { getAuthHeaders } from '../../../lib/oauth-helper.js';
 import { logger } from '../../../lib/logger.js';
 
 /**
@@ -16,30 +17,17 @@ import { logger } from '../../../lib/logger.js';
  */
 const executeFunction = async ({ scriptId, deploymentId, metricsGranularity, fields, key, access_token, oauth_token, prettyPrint = true }) => {
   const baseUrl = 'https://script.googleapis.com';
-  const token = process.env.GOOGLE_APP_SCRIPT_API_API_KEY;
 
   try {
     // Construct the URL with query parameters
     const url = new URL(`${baseUrl}/v1/projects/${scriptId}/metrics`);
-    url.searchParams.append('metricsFilter.deploymentId', deploymentId);
     url.searchParams.append('metricsGranularity', metricsGranularity);
-    url.searchParams.append('fields', fields);
-    url.searchParams.append('alt', 'json');
-    url.searchParams.append('key', key);
-    url.searchParams.append('$.xgafv', '1');
-    url.searchParams.append('access_token', access_token);
-    url.searchParams.append('oauth_token', oauth_token);
+    if (deploymentId) url.searchParams.append('metricsFilter.deploymentId', deploymentId);
+    if (fields) url.searchParams.append('fields', fields);
     url.searchParams.append('prettyPrint', prettyPrint.toString());
 
-    // Set up headers for the request
-    const headers = {
-      'Accept': 'application/json'
-    };
-
-    // If a token is provided, add it to the Authorization header
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
+    // Set up headers for the request (OAuth, matching the working read/create tools)
+    const headers = await getAuthHeaders();
 
     // Perform the fetch request
     const response = await fetch(url.toString(), {
