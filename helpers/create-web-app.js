@@ -1,6 +1,6 @@
 import { getOAuthAccessToken } from './lib/oauth-helper.js';
 
-const scriptId = '1fSY7y3Rh84FsgJmrFIMm4AUOV3mPgelLRvZ4Dahrv68zyDzX-cGbeYjn';
+const scriptId = 'YOUR_SCRIPT_ID_HERE';
 
 async function listDeployments() {
   try {

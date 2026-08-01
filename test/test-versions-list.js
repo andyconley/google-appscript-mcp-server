@@ -4,7 +4,7 @@ import 'dotenv/config';
 import { apiTool } from './tools/google-app-script-api/apps-script-api/script-projects-versions-list.js';
 
 async function testVersionsList() {
-  const scriptId = '1fSY7y3Rh84FsgJmrFIMm4AUOV3mPgelLRvZ4Dahrv68zyDzX-cGbeYjn';
+  const scriptId = 'YOUR_SCRIPT_ID_HERE';
   
   console.log('📋 Listing versions for script:', scriptId);
   console.log('═'.repeat(80));

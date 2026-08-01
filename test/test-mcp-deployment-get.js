@@ -1,8 +1,8 @@
 // Test script to verify MCP deployment get works
 import { apiTool } from './tools/google-app-script-api/apps-script-api/script-projects-deployments-get.js';
 
-const scriptId = '1fSY7y3Rh84FsgJmrFIMm4AUOV3mPgelLRvZ4Dahrv68zyDzX-cGbeYjn';
-const deploymentId = 'AKfycbzfRN3HuD8OsEwqQ9mSAGUbuGQrX3krWJPjewVkgKWEkzi_QpuoQBdDlrHBgAS4MhB4'; // From previous test
+const scriptId = 'YOUR_SCRIPT_ID_HERE';
+const deploymentId = 'YOUR_DEPLOYMENT_ID_HERE'; // From previous test
 
 async function testDeploymentGet() {
   console.log('🧪 Testing MCP deployment get...');

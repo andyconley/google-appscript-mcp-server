@@ -9,7 +9,7 @@ import { discoverTools } from './lib/tools.js';
 import { logger } from './lib/logger.js';
 
 // Known working script ID from previous tests
-const SCRIPT_ID = '1fSY7y3Rh84FsgJmrFIMm4AUOV3mPgelLRvZ4Dahrv68zyDzX-cGbeYjn';
+const SCRIPT_ID = 'YOUR_SCRIPT_ID_HERE';
 
 async function testFetchProcesses() {
   console.log('🔄 Testing MCP Server - Fetch Script Processes List\n');

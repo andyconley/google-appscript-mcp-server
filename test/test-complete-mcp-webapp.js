@@ -4,7 +4,7 @@ import { apiTool as createVersionTool } from './tools/google-app-script-api/apps
 import { apiTool as createDeploymentTool } from './tools/google-app-script-api/apps-script-api/script-projects-deployments-create.js';
 import { apiTool as getDeploymentTool } from './tools/google-app-script-api/apps-script-api/script-projects-deployments-get.js';
 
-const scriptId = '1fSY7y3Rh84FsgJmrFIMm4AUOV3mPgelLRvZ4Dahrv68zyDzX-cGbeYjn';
+const scriptId = 'YOUR_SCRIPT_ID_HERE';
 
 async function createCompleteWebAppViaMCP() {
   console.log('🚀 Creating complete web app deployment via MCP tools...');

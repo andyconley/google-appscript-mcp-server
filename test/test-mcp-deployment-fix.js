@@ -1,7 +1,7 @@
 // Test script to verify MCP deployment creation works
 import { apiTool } from './tools/google-app-script-api/apps-script-api/script-projects-deployments-create.js';
 
-const scriptId = '1fSY7y3Rh84FsgJmrFIMm4AUOV3mPgelLRvZ4Dahrv68zyDzX-cGbeYjn';
+const scriptId = 'YOUR_SCRIPT_ID_HERE';
 
 async function testDeploymentCreation() {
   console.log('🧪 Testing MCP deployment creation...');

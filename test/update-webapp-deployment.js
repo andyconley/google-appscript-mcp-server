@@ -3,8 +3,8 @@
 import { getOAuthAccessToken } from '../lib/oauth-helper.js';
 
 async function updateDeploymentForWebApp() {
-  const scriptId = '1fSY7y3Rh84FsgJmrFIMm4AUOV3mPgelLRvZ4Dahrv68zyDzX-cGbeYjn';
-  const deploymentId = 'AKfycbx58SZUlVdfZdlUsfYiJnj94oBrpb_yH7IpbSqu7bhDs8sawIgIXaw40c1NLooxNb2e';
+  const scriptId = 'YOUR_SCRIPT_ID_HERE';
+  const deploymentId = 'YOUR_DEPLOYMENT_ID_HERE';
   
   try {
     console.log('🔐 Getting OAuth token...');

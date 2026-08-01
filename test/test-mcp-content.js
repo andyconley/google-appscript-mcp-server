@@ -34,7 +34,7 @@ async function testMCPTools() {
     
     // Test the tool with your script ID
     console.log('📋 Step 2: Testing script content fetch...');
-    const scriptId = '1fSY7y3Rh84FsgJmrFIMm4AUOV3mPgelLRvZ4Dahrv68zyDzX-cGbeYjn';
+    const scriptId = 'YOUR_SCRIPT_ID_HERE';
     
     console.log(`🔍 Fetching content for script: ${scriptId}`);
     const result = await getContentTool.function({ scriptId });

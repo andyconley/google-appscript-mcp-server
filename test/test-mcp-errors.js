@@ -9,7 +9,7 @@ import { discoverTools } from './lib/tools.js';
 import { logger } from './lib/logger.js';
 
 // Real script ID used throughout the codebase
-const REAL_SCRIPT_ID = '1fSY7y3Rh84FsgJmrFIMm4AUOV3mPgelLRvZ4Dahrv68zyDzX-cGbeYjn';
+const REAL_SCRIPT_ID = 'YOUR_SCRIPT_ID_HERE';
 
 async function testMCPErrors() {
   console.log('🚨 MCP Server Error Analysis - Script Processes List\n');

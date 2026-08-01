@@ -7,7 +7,7 @@
 import { discoverTools } from './lib/tools.js';
 import { logger } from './lib/logger.js';
 
-const REAL_SCRIPT_ID = '1fSY7y3Rh84FsgJmrFIMm4AUOV3mPgelLRvZ4Dahrv68zyDzX-cGbeYjn';
+const REAL_SCRIPT_ID = 'YOUR_SCRIPT_ID_HERE';
 
 async function testFieldsIssue() {
   console.log('🔍 Testing Specific Fields Parameter Issue\n');

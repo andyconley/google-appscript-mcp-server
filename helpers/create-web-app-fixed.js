@@ -1,6 +1,6 @@
 import { getOAuthAccessToken } from './lib/oauth-helper.js';
 
-const scriptId = '1fSY7y3Rh84FsgJmrFIMm4AUOV3mPgelLRvZ4Dahrv68zyDzX-cGbeYjn';
+const scriptId = 'YOUR_SCRIPT_ID_HERE';
 
 async function createWebAppDeployment() {
   try {
@@ -90,7 +90,7 @@ async function main() {
   console.log('Checking existing deployments...');
   
   // Check the latest deployment we created
-  const existingDeploymentId = 'AKfycbx58SZUlVdfZdlUsfYiJnj94oBrpb_yH7IpbSqu7bhDs8sawIgIXaw40c1NLooxNb2e';
+  const existingDeploymentId = 'YOUR_DEPLOYMENT_ID_HERE';
   const existingDeployment = await getDeploymentDetails(existingDeploymentId);
   
   if (existingDeployment && existingDeployment.entryPoints && existingDeployment.entryPoints[0] && existingDeployment.entryPoints[0].webApp) {
