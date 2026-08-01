@@ -13,6 +13,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { discoverTools } from "./lib/tools.js";
 import { logger } from "./lib/logger.js";
+import { setReloadHandler } from "./lib/devControl.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -50,14 +51,13 @@ function transformTools(tools) {
   return transformedTools;
 }
 
-async function setupServerHandlers(server, tools) {
-  // Tools are static for the process lifetime, so transform once and reuse
-  // rather than re-mapping on every ListTools request.
-  const transformedTools = transformTools(tools);
-
+async function setupServerHandlers(server, state) {
+  // `state` is a shared, mutable holder ({ tools, transformed }). Handlers read
+  // it dynamically so reload_tools can swap in freshly-discovered tools without
+  // a process restart. Normal operation just reads the values set at startup.
   server.setRequestHandler(ListToolsRequestSchema, async () => {
-    logger.info('REQUEST', `Handling ListTools request; returning ${transformedTools.length} tools`);
-    return { tools: transformedTools };
+    logger.info('REQUEST', `Handling ListTools request; returning ${state.transformed.length} tools`);
+    return { tools: state.transformed };
   });
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
@@ -73,11 +73,11 @@ async function setupServerHandlers(server, tools) {
       timestamp: new Date().toISOString()
     });
 
-    const tool = tools.find((t) => t.definition.function.name === toolName);
+    const tool = state.tools.find((t) => t.definition.function.name === toolName);
     if (!tool) {
       logger.error('REQUEST', `Tool not found: ${toolName}`, {
         requestId,
-        availableTools: tools.map(t => t.definition.function.name)
+        availableTools: state.tools.map(t => t.definition.function.name)
       });
       throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${toolName}`);
     }
@@ -192,6 +192,18 @@ async function run() {
     toolNames: tools.map(t => t.definition?.function?.name).filter(Boolean)
   });
 
+  // Shared mutable state read by all handlers. reload_tools swaps these in place.
+  const state = { tools, transformed: transformTools(tools) };
+
+  // Let the reload_tools management tool re-discover tools without a restart.
+  setReloadHandler(async () => {
+    const fresh = await discoverTools({ bustCache: true });
+    state.tools = fresh;
+    state.transformed = transformTools(fresh);
+    logger.info('RELOAD', `Reloaded ${fresh.length} tools`);
+    return { toolCount: fresh.length, toolNames: fresh.map(t => t.definition.function.name) };
+  });
+
   if (isSSE) {
     const app = express();
     const transports = {};
@@ -222,7 +234,7 @@ async function run() {
         console.error("[Error]", error);
       };
       
-      await setupServerHandlers(server, tools);
+      await setupServerHandlers(server, state);
 
       const transport = new SSEServerTransport("/messages", res);
       transports[transport.sessionId] = transport;
@@ -283,7 +295,7 @@ async function run() {
       console.error("[Error]", error);
     };
     
-    await setupServerHandlers(server, tools);
+    await setupServerHandlers(server, state);
 
     process.on("SIGINT", async () => {
       logger.info('STDIO', 'Received SIGINT, shutting down gracefully');
