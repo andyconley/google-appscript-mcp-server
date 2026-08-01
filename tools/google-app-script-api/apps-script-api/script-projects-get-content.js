@@ -48,22 +48,6 @@ const apiTool = {
           fields: {
             type: 'string',
             description: 'Selector specifying which fields to include in a partial response.'
-          },
-          alt: {
-            type: 'string',
-            description: 'Data format for response.'
-          },
-          key: {
-            type: 'string',
-            description: 'API key for the project.'
-          },
-          access_token: {
-            type: 'string',
-            description: 'OAuth access token.'
-          },
-          prettyPrint: {
-            type: 'string',
-            description: 'Returns response with indentations and line breaks.'
           }
         },
         required: ['scriptId']

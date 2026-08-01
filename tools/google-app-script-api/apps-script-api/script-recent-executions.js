@@ -20,7 +20,13 @@ const FAILURE_STATUSES = ['FAILED', 'TIMED_OUT', 'CANCELED'];
  * @param {string} [args.pageToken] - Pagination token from a previous call.
  * @returns {Promise<Object>} { scriptId, count, failures, executions, nextPageToken }
  */
-const executeFunction = async ({ scriptId, onlyFailures = false, functionName, pageSize = 20, pageToken }) => {
+const executeFunction = async ({
+  scriptId,
+  onlyFailures = false,
+  functionName,
+  pageSize = 20,
+  pageToken
+}) => {
   try {
     if (!scriptId) throw new Error('scriptId is required');
 
@@ -37,7 +43,7 @@ const executeFunction = async ({ scriptId, onlyFailures = false, functionName, p
       label: 'RECENT_EXECUTIONS'
     });
 
-    const executions = (res.processes || []).map(p => ({
+    const executions = (res.processes || []).map((p) => ({
       functionName: p.functionName || null,
       status: p.processStatus || null,
       type: p.processType || null,
@@ -49,7 +55,7 @@ const executeFunction = async ({ scriptId, onlyFailures = false, functionName, p
     return {
       scriptId,
       count: executions.length,
-      failures: executions.filter(e => e.failed).length,
+      failures: executions.filter((e) => e.failed).length,
       executions,
       nextPageToken: res.nextPageToken || null
     };
@@ -64,7 +70,8 @@ const apiTool = {
     type: 'function',
     function: {
       name: 'recent_executions',
-      description: 'List recent executions of an Apps Script project (function, status, start time, duration). Optionally filter to failures. Uses execution metadata — no extra scope, and does not include console.log output.',
+      description:
+        'List recent executions of an Apps Script project (function, status, start time, duration). Optionally filter to failures. Uses execution metadata — no extra scope, and does not include console.log output.',
       parameters: {
         type: 'object',
         properties: {

@@ -40,7 +40,7 @@ const executeFunction = async ({ nameContains, pageSize = 50, pageToken }) => {
     });
 
     return {
-      scripts: (res.files || []).map(f => ({
+      scripts: (res.files || []).map((f) => ({
         scriptId: f.id,
         name: f.name,
         modifiedTime: f.modifiedTime,
@@ -59,7 +59,8 @@ const apiTool = {
     type: 'function',
     function: {
       name: 'list_script_projects',
-      description: "List or search the user's Google Apps Script projects (via Drive). Returns each project's scriptId and name. Use this to discover a scriptId when you don't already have one. Requires a Drive scope; re-run OAuth setup if it reports insufficient scopes.",
+      description:
+        "List or search the user's Google Apps Script projects (via Drive). Returns each project's scriptId and name. Use this to discover a scriptId when you don't already have one. Requires a Drive scope; re-run OAuth setup if it reports insufficient scopes.",
       parameters: {
         type: 'object',
         properties: {

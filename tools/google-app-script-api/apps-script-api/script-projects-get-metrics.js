@@ -57,25 +57,9 @@ const apiTool = {
           fields: {
             type: 'string',
             description: 'Selector specifying which fields to include in a partial response.'
-          },
-          key: {
-            type: 'string',
-            description: 'API key for the request.'
-          },
-          access_token: {
-            type: 'string',
-            description: 'OAuth access token for authorization.'
-          },
-          oauth_token: {
-            type: 'string',
-            description: 'OAuth 2.0 token for the current user.'
-          },
-          prettyPrint: {
-            type: 'boolean',
-            description: 'Whether to return the response with indentations and line breaks.'
           }
         },
-        required: ['scriptId', 'deploymentId', 'metricsGranularity', 'fields', 'key', 'access_token', 'oauth_token']
+        required: ['scriptId', 'deploymentId', 'metricsGranularity', 'fields']
       }
     }
   }

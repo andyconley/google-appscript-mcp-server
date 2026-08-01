@@ -16,7 +16,18 @@ import { callGoogleApi, toToolError, APPS_SCRIPT_BASE } from '../../../lib/appsS
  * @param {string} [args.userAccessLevels] - Filter by user access levels.
  * @returns {Promise<Object>} - The result of the script processes listing.
  */
-const executeFunction = async ({ scriptId, pageSize = 100, functionName, pageToken, startTime, endTime, deploymentId, types, statuses, userAccessLevels }) => {
+const executeFunction = async ({
+  scriptId,
+  pageSize = 100,
+  functionName,
+  pageToken,
+  startTime,
+  endTime,
+  deploymentId,
+  types,
+  statuses,
+  userAccessLevels
+}) => {
   try {
     if (!scriptId) throw new Error('scriptId is required');
     return await callGoogleApi({
@@ -51,7 +62,7 @@ const apiTool = {
     type: 'function',
     function: {
       name: 'list_script_processes',
-      description: 'List information about a script\'s executed processes.',
+      description: "List information about a script's executed processes.",
       parameters: {
         type: 'object',
         properties: {

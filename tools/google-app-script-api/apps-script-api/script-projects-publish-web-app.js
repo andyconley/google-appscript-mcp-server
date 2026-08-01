@@ -23,7 +23,10 @@ const executeFunction = async ({ scriptId, deploymentId, description, files }) =
 
     // 1. Optionally push new content first.
     if (Array.isArray(files) && files.length > 0) {
-      logger.info('PUBLISH_WEBAPP', 'Updating project content before publishing', { scriptId, fileCount: files.length });
+      logger.info('PUBLISH_WEBAPP', 'Updating project content before publishing', {
+        scriptId,
+        fileCount: files.length
+      });
       await callGoogleApi({
         method: 'PUT',
         url: `${APPS_SCRIPT_BASE}/v1/projects/${enc(scriptId)}/content`,
@@ -54,8 +57,12 @@ const executeFunction = async ({ scriptId, deploymentId, description, files }) =
       label: 'PUBLISH_WEBAPP'
     });
 
-    const webApp = (deployment.entryPoints || []).find(e => e.entryPointType === 'WEB_APP')?.webApp;
-    logger.info('PUBLISH_WEBAPP', 'Publish complete', { scriptId, deploymentId, versionNumber: version.versionNumber });
+    const webApp = (deployment.entryPoints || []).find((e) => e.entryPointType === 'WEB_APP')?.webApp;
+    logger.info('PUBLISH_WEBAPP', 'Publish complete', {
+      scriptId,
+      deploymentId,
+      versionNumber: version.versionNumber
+    });
     return {
       versionNumber: version.versionNumber,
       deploymentId,
@@ -63,7 +70,11 @@ const executeFunction = async ({ scriptId, deploymentId, description, files }) =
       deployment
     };
   } catch (error) {
-    logger.error('PUBLISH_WEBAPP', 'Failed to publish web app', { scriptId, deploymentId, message: error.message });
+    logger.error('PUBLISH_WEBAPP', 'Failed to publish web app', {
+      scriptId,
+      deploymentId,
+      message: error.message
+    });
     return toToolError(error, { scriptId, deploymentId });
   }
 };
@@ -74,7 +85,8 @@ const apiTool = {
     type: 'function',
     function: {
       name: 'publish_web_app',
-      description: 'Publish a Google Apps Script web app in one step: optionally update content, create a new version, and repoint an existing deployment to it (deployment URL stays stable).',
+      description:
+        'Publish a Google Apps Script web app in one step: optionally update content, create a new version, and repoint an existing deployment to it (deployment URL stays stable).',
       parameters: {
         type: 'object',
         properties: {
@@ -92,7 +104,8 @@ const apiTool = {
           },
           files: {
             type: 'array',
-            description: 'Optional project files to write before publishing (Apps Script content format: { name, type, source }). If omitted, the current saved content is published.',
+            description:
+              'Optional project files to write before publishing (Apps Script content format: { name, type, source }). If omitted, the current saved content is published.',
             items: { type: 'object' }
           }
         },

@@ -28,7 +28,8 @@ const apiTool = {
     type: 'function',
     function: {
       name: 'script_projects_get',
-      description: 'Get metadata of a Google Apps Script project. OAuth authentication is handled automatically.',
+      description:
+        'Get metadata of a Google Apps Script project. OAuth authentication is handled automatically.',
       parameters: {
         type: 'object',
         properties: {
@@ -39,21 +40,6 @@ const apiTool = {
           fields: {
             type: 'string',
             description: 'Selector specifying which fields to include in a partial response.'
-          },
-          alt: {
-            type: 'string',
-            enum: ['json'],
-            description: 'Data format for response.',
-            default: 'json'
-          },
-          quotaUser: {
-            type: 'string',
-            description: 'Arbitrary string assigned to a user for quota purposes.'
-          },
-          prettyPrint: {
-            type: 'boolean',
-            description: 'Returns response with indentations and line breaks.',
-            default: true
           }
         },
         required: ['scriptId']

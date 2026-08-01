@@ -15,7 +15,7 @@ const executeFunction = async () => {
   try {
     const info = new TokenManager().getTokenInfo();
     const granted = (info.scope || '').split(/\s+/).filter(Boolean);
-    const missing = SCOPES.filter(s => !granted.includes(s));
+    const missing = SCOPES.filter((s) => !granted.includes(s));
 
     return {
       hasTokens: !!info.hasTokens,
@@ -43,7 +43,8 @@ const apiTool = {
     type: 'function',
     function: {
       name: 'auth_status',
-      description: 'Report OAuth token validity, expiry, and granted-vs-requested scopes (never exposes the token). Dev/diagnostic tool.',
+      description:
+        'Report OAuth token validity, expiry, and granted-vs-requested scopes (never exposes the token). Dev/diagnostic tool.',
       parameters: { type: 'object', properties: {}, required: [] }
     }
   }

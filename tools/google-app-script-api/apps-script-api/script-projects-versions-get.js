@@ -49,35 +49,6 @@ const apiTool = {
           fields: {
             type: 'string',
             description: 'Selector specifying which fields to include in a partial response.'
-          },
-          alt: {
-            type: 'string',
-            enum: ['json', 'xml'],
-            description: 'Data format for response.'
-          },
-          key: {
-            type: 'string',
-            description: 'API key for the project.'
-          },
-          access_token: {
-            type: 'string',
-            description: 'OAuth access token.'
-          },
-          quotaUser: {
-            type: 'string',
-            description: 'Available to use for quota purposes for server-side applications.'
-          },
-          oauth_token: {
-            type: 'string',
-            description: 'OAuth 2.0 token for the current user.'
-          },
-          callback: {
-            type: 'string',
-            description: 'JSONP callback.'
-          },
-          prettyPrint: {
-            type: 'boolean',
-            description: 'Returns response with indentations and line breaks.'
           }
         },
         required: ['scriptId', 'versionNumber']

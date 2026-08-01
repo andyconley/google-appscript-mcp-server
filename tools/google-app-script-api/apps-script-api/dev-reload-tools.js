@@ -29,7 +29,8 @@ const apiTool = {
     type: 'function',
     function: {
       name: 'reload_tools',
-      description: 'Hot-reload tool modules (files under tools/) into the running server without a restart. Core changes (mcpServer.js, lib/*) still need a restart. Dev tool.',
+      description:
+        'Hot-reload tool modules (files under tools/) into the running server without a restart. Core changes (mcpServer.js, lib/*) still need a restart. Dev tool.',
       parameters: { type: 'object', properties: {}, required: [] }
     }
   }

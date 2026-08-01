@@ -128,10 +128,6 @@ const apiTool = {
           fields: {
             type: 'string',
             description: 'Selector specifying which fields to include in a partial response.'
-          },
-          prettyPrint: {
-            type: 'boolean',
-            description: 'Returns response with indentations and line breaks.'
           }
         },
         required: ['scriptId']

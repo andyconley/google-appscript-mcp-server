@@ -10,8 +10,11 @@ test('every registered tool loads (no silent load failures)', async () => {
   const tools = await discoverTools();
   // With DEV_TOOLS=1 every path must load; a mismatch means a tool failed to
   // import (e.g. a syntax error) and was silently dropped.
-  assert.equal(tools.length, toolPaths.length,
-    `loaded ${tools.length} of ${toolPaths.length} tools — one failed to import`);
+  assert.equal(
+    tools.length,
+    toolPaths.length,
+    `loaded ${tools.length} of ${toolPaths.length} tools — one failed to import`
+  );
 });
 
 test('all tools load with valid, unique schemas', async () => {
@@ -35,6 +38,19 @@ test('all tools load with valid, unique schemas', async () => {
       assert.ok(req in fn.parameters.properties, `${fn.name}: required '${req}' not in properties`);
     }
     assert.equal(typeof t.function, 'function', `${fn.name}: has an executable function`);
+  }
+});
+
+test('no tool exposes codegen junk params in its schema', async () => {
+  // These were request-noise the shared client handles or ignores; exposing
+  // them in a tool schema only misleads an LLM client.
+  const banned = ['key', 'access_token', 'oauth_token', 'alt', 'quotaUser', 'prettyPrint', 'callback'];
+  const tools = await discoverTools();
+  for (const t of tools) {
+    const props = Object.keys(t.definition.function.parameters.properties ?? {});
+    for (const b of banned) {
+      assert.ok(!props.includes(b), `${t.definition.function.name} must not expose '${b}'`);
+    }
   }
 });
 

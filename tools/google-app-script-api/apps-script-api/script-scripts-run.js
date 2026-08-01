@@ -39,7 +39,8 @@ const apiTool = {
     type: 'function',
     function: {
       name: 'script_run',
-      description: 'Run a function in a Google Apps Script project. The script must be deployed as an API executable and share the calling OAuth client\'s Cloud project.',
+      description:
+        "Run a function in a Google Apps Script project. The script must be deployed as an API executable and share the calling OAuth client's Cloud project.",
       parameters: {
         type: 'object',
         properties: {
@@ -58,7 +59,8 @@ const apiTool = {
           },
           devMode: {
             type: 'boolean',
-            description: 'Run the latest saved (HEAD) code instead of the deployed version. Only works for the script owner.'
+            description:
+              'Run the latest saved (HEAD) code instead of the deployed version. Only works for the script owner.'
           }
         },
         required: ['scriptId', 'functionName']

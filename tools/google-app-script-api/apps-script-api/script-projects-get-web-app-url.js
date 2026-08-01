@@ -31,10 +31,10 @@ const executeFunction = async ({ scriptId, deploymentId }) => {
       deployments = list.deployments || [];
     }
 
-    const webApps = deployments.flatMap(d =>
+    const webApps = deployments.flatMap((d) =>
       (d.entryPoints || [])
-        .filter(e => e.entryPointType === 'WEB_APP')
-        .map(e => ({
+        .filter((e) => e.entryPointType === 'WEB_APP')
+        .map((e) => ({
           deploymentId: d.deploymentId,
           versionNumber: d.deploymentConfig?.versionNumber ?? 'HEAD',
           url: e.webApp?.url || null,
