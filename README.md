@@ -20,6 +20,7 @@ This MCP server provides comprehensive integration with the Google Apps Script A
 ## 📋 Table of Contents
 
 - [Overview](#overview)
+- [What This Fork Adds](#-what-this-fork-adds)
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Quick Start Guide](#quick-start-guide)
@@ -39,6 +40,28 @@ This MCP server enables seamless interaction with Google Apps Script through:
 - ✅ **Secure Token Storage** - OS-specific secure storage for refresh tokens
 - ✅ **Auto Token Refresh** - Handles token expiration automatically
 - ✅ **Detailed Logging** - Comprehensive error handling and debugging
+
+## 🍴 What This Fork Adds
+
+This fork keeps the full upstream toolset and adds the following. See the [fork notice](#-fork-notice) above for the reliability fixes; the capabilities below are new.
+
+**New tools**
+- **`publish_web_app`** — one call to publish a web app: optionally update content, create a version, and repoint an existing deployment to it (the deployment URL stays stable). Wraps the manual `update_script_content` → `versions.create` → `deployments.update` flow so it can't be left half-done.
+- **`get_web_app_url`** — return the `/exec` URL(s) and access config (`access`, `executeAs`, version) for a project's deployments.
+- **`list_script_projects`** — discover Apps Script projects via the Drive API (the Apps Script API has no "list my projects"). Returns each project's `scriptId` and name. **Requires the `drive.metadata.readonly` scope** — re-run OAuth setup to re-consent before it works (see [Re-consenting for new scopes](#re-consenting-for-new-scopes)).
+
+**Fixes to existing tools**
+- **`script_run`** now actually runs a function. It previously sent an empty POST body (no `function`), so it could never execute anything. It now accepts `functionName`, `parameters`, and `devMode`.
+- **`deployments.update`** — `versionNumber` is now optional; omit it to track **HEAD** (latest saved content).
+
+**Dev / diagnostic tools** (hidden unless `DEV_TOOLS=1`)
+- **`auth_status`** — token validity, expiry, and granted-vs-requested scopes (never exposes the token). The fastest way to tell an auth problem (missing scope) from a code problem (endpoint bug).
+- **`server_info`** — version, pid, uptime, transport, log level, loaded tools.
+- **`reload_tools`** — hot-reload tool files into the running server without a restart (see [Restarting & reloading](#restarting--reloading)).
+
+**Operational**
+- `bin/restart-dev.sh` — restart helper for core changes.
+- SSE mode now binds to `127.0.0.1` by default (override with `SSE_HOST`) because the SSE endpoints are unauthenticated.
 
 ## 🎥 Demo Video
 
@@ -451,6 +474,39 @@ This MCP server provides 16 comprehensive tools for Google Apps Script managemen
 - Performance metrics
 - Usage analytics
 
+### Fork Additions
+
+These tools are added by this fork (see [What This Fork Adds](#-what-this-fork-adds)).
+
+#### `publish_web_app`
+**Purpose**: Publish a web app in one call (optionally update content → create version → repoint an existing deployment). The deployment URL stays stable.
+**Parameters**:
+- `scriptId` (required): The script project ID
+- `deploymentId` (required): The existing deployment to repoint
+- `description` (optional): Version/deployment description
+- `files` (optional): Project files to write first (Apps Script content format); if omitted, the current saved content is published
+
+#### `get_web_app_url`
+**Purpose**: Get the web app `/exec` URL(s) and access config for a project.
+**Parameters**:
+- `scriptId` (required): The script project ID
+- `deploymentId` (optional): A specific deployment; if omitted, all deployments are scanned
+
+#### `list_script_projects`
+**Purpose**: Discover the user's Apps Script projects via Drive (returns `scriptId` + name). Use when you don't already have a `scriptId`.
+**Parameters**: `nameContains` (optional), `pageSize` (optional), `pageToken` (optional)
+**Note**: Requires the `drive.metadata.readonly` scope — see [Re-consenting for new scopes](#re-consenting-for-new-scopes).
+
+### Dev / Diagnostic Tools
+
+Hidden unless `DEV_TOOLS=1` (see [Environment Variables](#environment-variables)).
+
+| Tool | Purpose |
+|------|---------|
+| `auth_status` | Token validity, expiry, and granted-vs-requested scopes (token never exposed). |
+| `server_info` | Version, pid, uptime, transport, log level, loaded tools. |
+| `reload_tools` | Hot-reload tool files into the running server without a restart. |
+
 ### Tool Categories Summary
 
 | Category | Tools | Purpose |
@@ -460,6 +516,9 @@ This MCP server provides 16 comprehensive tools for Google Apps Script managemen
 | **Deployment** | deployments-create, deployments-get, deployments-list, deployments-update, deployments-delete | Manage script deployments |
 | **Execution** | scripts-run | Execute script functions |
 | **Monitoring** | processes-list, get-metrics | Monitor execution and performance |
+| **Fork: Web App** | publish_web_app, get_web_app_url | Publish and inspect web app deployments |
+| **Fork: Discovery** | list_script_projects | Find projects by name (Drive) |
+| **Fork: Dev** *(DEV_TOOLS=1)* | auth_status, server_info, reload_tools | Diagnostics and hot-reload |
 
 ### Common Use Cases
 
@@ -987,6 +1046,10 @@ GOOGLE_APP_SCRIPT_API_CLIENT_SECRET=your_client_secret
 LOG_LEVEL=info                    # debug, info, warn, error
 NODE_ENV=development              # development, production
 PORT=3001                        # OAuth callback port
+
+# Fork additions
+DEV_TOOLS=1                       # expose dev tools (auth_status, server_info, reload_tools); omit/0 to hide
+SSE_HOST=127.0.0.1               # SSE bind host; defaults to loopback (endpoints are unauthenticated)
 ```
 
 #### Logging Levels
@@ -994,6 +1057,27 @@ PORT=3001                        # OAuth callback port
 - `info`: General information messages  
 - `warn`: Warning messages
 - `error`: Error messages only
+
+### Restarting & reloading
+
+A stdio MCP server can't restart itself — its lifecycle is owned by the MCP client (e.g. Claude Desktop), which does the `initialize` handshake once. So how you pick up changes depends on what you changed:
+
+- **Editing a tool file** (`tools/**`): call the **`reload_tools`** tool (requires `DEV_TOOLS=1`). It hot-reloads tool modules into the running server — no restart, session stays live.
+- **Editing core** (`mcpServer.js`, `lib/*`, scopes): run **`bin/restart-dev.sh`** to stop the process, then let your client reconnect (it respawns a fresh process with the updated code). The client's reconnect/relaunch is what actually re-establishes the session.
+
+```bash
+# core change -> stop the process; client respawns fresh code on next call/reconnect
+./bin/restart-dev.sh
+```
+
+### Re-consenting for new scopes
+
+`list_script_projects` uses the Drive API and needs the `drive.metadata.readonly` scope. A token only carries the scopes granted at consent time, so after a scope is added you must re-consent:
+
+1. Revoke the app's current grant at https://myaccount.google.com/permissions
+2. Re-run OAuth setup: `node oauth-setup.js`
+
+Run **`auth_status`** (with `DEV_TOOLS=1`) at any time to see exactly which requested scopes are granted vs. missing.
 
 ### Running in Production
 
