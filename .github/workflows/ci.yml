@@ -15,6 +15,10 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Format check
+        run: npm run format:check
       - name: Unit + contract tests (hermetic)
         run: npm test
       - name: Dependency audit (fail on high+)

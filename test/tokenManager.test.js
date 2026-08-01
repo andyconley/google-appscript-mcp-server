@@ -14,7 +14,10 @@ test('single-flight: concurrent refreshes coalesce onto one', async () => {
 
   const results = await Promise.all([1, 2, 3, 4, 5].map(() => tm._refreshSingleFlight('id', 'sec')));
   assert.equal(n, 1, 'only one underlying refresh');
-  assert.ok(results.every((r) => r.access_token === results[0].access_token), 'all callers get the same token');
+  assert.ok(
+    results.every((r) => r.access_token === results[0].access_token),
+    'all callers get the same token'
+  );
 
   await tm._refreshSingleFlight('id', 'sec'); // promise settled -> a new refresh runs
   assert.equal(n, 2);

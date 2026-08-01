@@ -8,6 +8,9 @@
     "list-tools": "node index.js tools",
     "test": "LOG_LEVEL=error node --test test/*.test.js",
     "test:integration": "LOG_LEVEL=error RUN_INTEGRATION=1 node --test test/integration.test.js",
+    "lint": "eslint .",
+    "format": "prettier --write \"lib/**/*.js\" \"tools/**/*.js\" \"test/**/*.js\" mcpServer.js index.js",
+    "format:check": "prettier --check \"lib/**/*.js\" \"tools/**/*.js\" \"test/**/*.js\" mcpServer.js index.js",
     "setup-oauth": "node oauth-setup.js",
     "start": "node mcpServer.js",
     "start-sse": "node mcpServer.js --sse",
@@ -23,7 +26,7 @@
     "open": "^10.1.2"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "author": "Andy Conley",
   "contributors": [
@@ -34,5 +37,12 @@
     "type": "git",
     "url": "git+https://github.com/andyconley/google-appscript-mcp-server.git"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.8.0",
+    "prettier": "^3.9.6"
+  }
 }

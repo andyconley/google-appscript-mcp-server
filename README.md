@@ -911,6 +911,8 @@ Tests use the built-in Node test runner (`node --test`) — no extra dependencie
 ```bash
 npm test                 # hermetic unit + contract tests (no credentials, no network)
 npm run test:integration # opt-in live tests against the Google API (see below)
+npm run lint             # ESLint
+npm run format           # Prettier (write); `npm run format:check` to verify
 ```
 
 **What the hermetic suite covers:**
@@ -924,7 +926,7 @@ npm run test:integration # opt-in live tests against the Google API (see below)
 RUN_INTEGRATION=1 INTEGRATION_SCRIPT_ID=<a scriptId you can read> npm run test:integration
 ```
 
-CI (GitHub Actions, `.github/workflows/ci.yml`) runs the hermetic suite and `npm audit --audit-level=high` on every push and pull request.
+CI (GitHub Actions, `.github/workflows/ci.yml`) runs ESLint, a Prettier format check, the hermetic suite, and `npm audit --audit-level=high` on every push and pull request.
 
 ## 🔍 Troubleshooting
 

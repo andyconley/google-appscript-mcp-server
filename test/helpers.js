@@ -28,8 +28,15 @@ export function installMockFetch(handler) {
   const calls = [];
   const mock = async (url, init = {}) => {
     const callIndex = calls.length;
-    calls.push({ url: url.toString(), method: init.method || 'GET', headers: init.headers || {}, body: init.body });
-    const r = (typeof handler === 'function' ? await handler({ url: url.toString(), init, callIndex }) : handler) || {};
+    calls.push({
+      url: url.toString(),
+      method: init.method || 'GET',
+      headers: init.headers || {},
+      body: init.body
+    });
+    const r =
+      (typeof handler === 'function' ? await handler({ url: url.toString(), init, callIndex }) : handler) ||
+      {};
     const status = r.status ?? 200;
     return {
       ok: status >= 200 && status < 300,

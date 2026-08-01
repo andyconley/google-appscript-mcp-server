@@ -56,12 +56,18 @@ test('retries 429 for any method (incl. POST)', async () => {
 test('retries 5xx for GET but not for POST', async () => {
   process.env.RETRY_BACKOFF_MS = '1';
   let g = 0;
-  installMockFetch(() => { g++; return { status: 500 }; });
+  installMockFetch(() => {
+    g++;
+    return { status: 500 };
+  });
   await assert.rejects(() => callGoogleApi({ method: 'GET', url: 'https://x/y' }));
   assert.equal(g, 3, 'GET = initial + 2 retries');
 
   let p = 0;
-  installMockFetch(() => { p++; return { status: 500 }; });
+  installMockFetch(() => {
+    p++;
+    return { status: 500 };
+  });
   await assert.rejects(() => callGoogleApi({ method: 'POST', url: 'https://x/y', body: {} }));
   assert.equal(p, 1, 'POST not retried on 5xx');
 });

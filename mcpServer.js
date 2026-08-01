@@ -1,29 +1,33 @@
 #!/usr/bin/env node
 
-import dotenv from "dotenv";
-import express from "express";
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import dotenv from 'dotenv';
+import express from 'express';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import {
   CallToolRequestSchema,
   ErrorCode,
   ListToolsRequestSchema,
-  McpError,
-} from "@modelcontextprotocol/sdk/types.js";
-import { discoverTools } from "./lib/tools.js";
-import { logger } from "./lib/logger.js";
-import { setReloadHandler } from "./lib/devControl.js";
+  McpError
+} from '@modelcontextprotocol/sdk/types.js';
+import { discoverTools } from './lib/tools.js';
+import { logger } from './lib/logger.js';
+import { setReloadHandler } from './lib/devControl.js';
 
-import path from "path";
-import { fileURLToPath } from "url";
+import path from 'path';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, ".env") });
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-const SERVER_NAME = "generated-mcp-server";
+// Report the real package identity (not a codegen placeholder).
+const pkg = JSON.parse(readFileSync(path.resolve(__dirname, 'package.json'), 'utf8'));
+const SERVER_NAME = pkg.name;
+const SERVER_VERSION = pkg.version;
 
 // Summarize tool args for INFO logs: keys + sizes, never the values. Tool args
 // can be large (full script source in update_script_content) and sensitive
@@ -57,11 +61,11 @@ function transformTools(tools) {
       return {
         name: definitionFunction.name,
         description: definitionFunction.description,
-        inputSchema: definitionFunction.parameters,
+        inputSchema: definitionFunction.parameters
       };
     })
     .filter(Boolean);
-  
+
   logger.info('SETUP', `Successfully transformed ${transformedTools.length} tools`);
   return transformedTools;
 }
@@ -80,7 +84,7 @@ async function setupServerHandlers(server, state) {
     const requestId = logger.generateRequestId();
     const toolName = request.params.name;
     const args = request.params.arguments;
-    
+
     logger.info('REQUEST', `CallTool request received`, {
       requestId,
       toolName,
@@ -93,13 +97,13 @@ async function setupServerHandlers(server, state) {
     if (!tool) {
       logger.error('REQUEST', `Tool not found: ${toolName}`, {
         requestId,
-        availableTools: state.tools.map(t => t.definition.function.name)
+        availableTools: state.tools.map((t) => t.definition.function.name)
       });
       throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${toolName}`);
     }
 
     const requiredParameters = tool.definition?.function?.parameters?.required || [];
-    
+
     // Validate required parameters
     for (const requiredParameter of requiredParameters) {
       if (!(requiredParameter in args)) {
@@ -109,10 +113,7 @@ async function setupServerHandlers(server, state) {
           missingParameter: requiredParameter,
           providedArgs: Object.keys(args)
         });
-        throw new McpError(
-          ErrorCode.InvalidParams,
-          `Missing required parameter: ${requiredParameter}`
-        );
+        throw new McpError(ErrorCode.InvalidParams, `Missing required parameter: ${requiredParameter}`);
       }
     }
 
@@ -153,11 +154,11 @@ async function setupServerHandlers(server, state) {
       return {
         content: [
           {
-            type: "text",
-            text: resultText,
-          },
+            type: 'text',
+            text: resultText
+          }
         ],
-        isError,
+        isError
       };
     } catch (error) {
       const duration = Date.now() - startTime;
@@ -174,7 +175,7 @@ async function setupServerHandlers(server, state) {
         args: summarizeArgs(args)
       });
 
-      console.error("[Error] Tool execution threw:", error);
+      console.error('[Error] Tool execution threw:', error);
 
       // Return a model-visible error result (isError) rather than throwing a
       // protocol-level McpError, so a thrown failure and a returned
@@ -182,15 +183,11 @@ async function setupServerHandlers(server, state) {
       return {
         content: [
           {
-            type: "text",
-            text: JSON.stringify(
-              { error: true, message: error.message, name: error.name },
-              null,
-              2
-            ),
-          },
+            type: 'text',
+            text: JSON.stringify({ error: true, message: error.message, name: error.name }, null, 2)
+          }
         ],
-        isError: true,
+        isError: true
       };
     }
   });
@@ -198,14 +195,14 @@ async function setupServerHandlers(server, state) {
 
 async function run() {
   const args = process.argv.slice(2);
-  const isSSE = args.includes("--sse");
-  
+  const isSSE = args.includes('--sse');
+
   logger.info('STARTUP', `Starting MCP server in ${isSSE ? 'SSE' : 'STDIO'} mode`);
-  
+
   const tools = await discoverTools();
   logger.info('STARTUP', `Discovered ${tools.length} tools`, {
-    toolPaths: tools.map(t => t.path),
-    toolNames: tools.map(t => t.definition?.function?.name).filter(Boolean)
+    toolPaths: tools.map((t) => t.path),
+    toolNames: tools.map((t) => t.definition?.function?.name).filter(Boolean)
   });
 
   // Shared mutable state read by all handlers. reload_tools swaps these in place.
@@ -217,7 +214,7 @@ async function run() {
     state.tools = fresh;
     state.transformed = transformTools(fresh);
     logger.info('RELOAD', `Reloaded ${fresh.length} tools`);
-    return { toolCount: fresh.length, toolNames: fresh.map(t => t.definition.function.name) };
+    return { toolCount: fresh.length, toolNames: fresh.map((t) => t.definition.function.name) };
   });
 
   if (isSSE) {
@@ -226,37 +223,37 @@ async function run() {
     const servers = {};
     let sessionCounter = 0;
 
-    app.get("/sse", async (_req, res) => {
+    app.get('/sse', async (_req, res) => {
       // Monotonic counter avoids the collision two connections in the same
       // millisecond would hit with a Date.now()-based id.
       const sessionId = `sse_${++sessionCounter}`;
       logger.info('SSE', `New SSE connection established`, { sessionId });
-      
+
       // Create a new Server instance for each session
       const server = new Server(
         {
           name: SERVER_NAME,
-          version: "0.1.0",
+          version: SERVER_VERSION
         },
         {
           capabilities: {
-            tools: {},
-          },
+            tools: {}
+          }
         }
       );
-      
+
       server.onerror = (error) => {
         logger.error('SSE', `Server error for session ${sessionId}`, error);
-        console.error("[Error]", error);
+        console.error('[Error]', error);
       };
-      
+
       await setupServerHandlers(server, state);
 
-      const transport = new SSEServerTransport("/messages", res);
+      const transport = new SSEServerTransport('/messages', res);
       transports[transport.sessionId] = transport;
       servers[transport.sessionId] = server;
 
-      res.on("close", async () => {
+      res.on('close', async () => {
         logger.info('SSE', `SSE connection closed`, { sessionId: transport.sessionId });
         delete transports[transport.sessionId];
         await server.close();
@@ -266,7 +263,7 @@ async function run() {
       await server.connect(transport);
     });
 
-    app.post("/messages", async (req, res) => {
+    app.post('/messages', async (req, res) => {
       const sessionId = req.query.sessionId;
       const transport = transports[sessionId];
       const server = servers[sessionId];
@@ -276,7 +273,7 @@ async function run() {
         await transport.handlePostMessage(req, res);
       } else {
         logger.warn('SSE', `No transport/server found for session`, { sessionId });
-        res.status(400).send("No transport/server found for sessionId");
+        res.status(400).send('No transport/server found for sessionId');
       }
     });
 
@@ -293,27 +290,27 @@ async function run() {
   } else {
     // stdio mode: single server instance
     logger.info('STDIO', 'Initializing STDIO server');
-    
+
     const server = new Server(
       {
         name: SERVER_NAME,
-        version: "0.1.0",
+        version: '0.1.0'
       },
       {
         capabilities: {
-          tools: {},
-        },
+          tools: {}
+        }
       }
     );
-    
+
     server.onerror = (error) => {
       logger.error('STDIO', 'Server error', error);
-      console.error("[Error]", error);
+      console.error('[Error]', error);
     };
-    
+
     await setupServerHandlers(server, state);
 
-    process.on("SIGINT", async () => {
+    process.on('SIGINT', async () => {
       logger.info('STDIO', 'Received SIGINT, shutting down gracefully');
       await server.close();
       process.exit(0);
