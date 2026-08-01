@@ -1,8 +1,17 @@
 # Google Apps Script MCP Server
 
-**Author**: [mohalmah](https://github.com/mohalmah)  
+**Original Author**: [mohalmah](https://github.com/mohalmah)  
 **License**: MIT License  
-**Repository**: [google-apps-script-mcp-server](https://github.com/mohalmah/google-apps-script-mcp-server)
+**Upstream Repository**: [mohalmah/google-appscript-mcp-server](https://github.com/mohalmah/google-appscript-mcp-server)
+
+> ### 🍴 Fork notice
+> This is a fork of [mohalmah/google-appscript-mcp-server](https://github.com/mohalmah/google-appscript-mcp-server), maintained by [andyconley](https://github.com/andyconley). Full credit for the original server goes to mohalmah.
+>
+> This fork adds the following fixes on top of upstream:
+> - **OAuth on all write tools** — `deployments` update/delete, `get-metrics`, `versions-get`, and `list-script-processes` were authenticating against a non-existent `GOOGLE_APP_SCRIPT_API_API_KEY` env var (sending `Bearer undefined`) and returned 401 out of the box; they now use the same OAuth path as the working read tools.
+> - **stdio-safe logging** — diagnostic logs were written to stdout, which is the JSON-RPC channel in stdio mode; they now go to stderr so they can't corrupt the protocol.
+> - **Unified failure contract** — tool failures are surfaced via MCP's `isError` flag instead of being returned as success payloads.
+> - **Single-flight token refresh** — concurrent tool calls near token expiry no longer each fire their own refresh (which could race and invalidate each other).
 
 Welcome to the Google Apps Script MCP (Model Context Protocol) Server! 🚀 
 
