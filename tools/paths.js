@@ -14,5 +14,9 @@ export const toolPaths = [
   'google-app-script-api/apps-script-api/script-projects-get-content.js',
   'google-app-script-api/apps-script-api/script-projects-versions-list.js',
   'google-app-script-api/apps-script-api/script-projects-versions-get.js',
-  'google-app-script-api/apps-script-api/script-processes-list.js'
+  'google-app-script-api/apps-script-api/script-processes-list.js',
+  // Fork additions: composite + discovery tools
+  'google-app-script-api/apps-script-api/script-projects-publish-web-app.js',
+  'google-app-script-api/apps-script-api/script-projects-get-web-app-url.js',
+  'google-app-script-api/apps-script-api/drive-list-script-projects.js'
 ];

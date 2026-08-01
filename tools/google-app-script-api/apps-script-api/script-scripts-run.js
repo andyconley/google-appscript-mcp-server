@@ -1,96 +1,45 @@
-import { getAuthHeaders } from '../../../lib/oauth-helper.js';
-import { logger } from '../../../lib/logger.js';
+import { callGoogleApi, toToolError, APPS_SCRIPT_BASE } from '../../../lib/appsScriptClient.js';
 
 /**
- * Function to run a Google Apps Script.
+ * Run a function in a Google Apps Script project (scripts.run).
  *
- * @param {Object} args - Arguments for the script execution.
+ * Requires the script to be deployed as an API executable and the calling
+ * OAuth client to share the script's Cloud project.
+ *
+ * @param {Object} args
  * @param {string} args.scriptId - The ID of the script to run.
- * @param {string} [args.fields] - Selector specifying which fields to include in a partial response.
- * @param {string} [args.alt='json'] - Data format for response.
- * @param {string} [args.key] - API key for the project.
- * @param {string} [args.access_token] - OAuth access token.
- * @param {string} [args.oauth_token] - OAuth 2.0 token for the current user.
- * @param {string} [args.quotaUser] - Available to use for quota purposes for server-side applications.
- * @param {boolean} [args.prettyPrint=true] - Returns response with indentations and line breaks.
- * @returns {Promise<Object>} - The result of the script execution.
+ * @param {string} args.functionName - The name of the function to execute.
+ * @param {Array}  [args.parameters] - Parameters passed to the function (JSON-compatible values).
+ * @param {boolean} [args.devMode=false] - Run the latest saved (HEAD) code instead of the deployed version.
+ * @returns {Promise<Object>} The execution response (result or error).
  */
-const executeFunction = async ({ scriptId, fields, alt = 'json', key, access_token, oauth_token, quotaUser, prettyPrint = true }) => {
-  const baseUrl = 'https://script.googleapis.com';
-  const url = new URL(`${baseUrl}/v1/scripts/${scriptId}:run`);
-  
-  // Append query parameters to the URL
-  const params = new URLSearchParams({
-    fields,
-    alt,
-    key,
-    access_token,
-    oauth_token,
-    quotaUser,
-    prettyPrint: prettyPrint.toString(),
-    '$.xgafv': '1',
-    upload_protocol: 'raw',
-    uploadType: 'raw'
-  });
-  
-  url.search = params.toString();
-
+const executeFunction = async ({ scriptId, functionName, parameters, devMode = false }) => {
   try {
-    // Get OAuth headers
-    const headers = await getAuthHeaders();
-    headers['Content-Type'] = 'application/json';
-    // Perform the fetch request
-    const response = await fetch(url.toString(), {
+    if (!scriptId) throw new Error('scriptId is required');
+    if (!functionName) throw new Error('functionName is required');
+
+    const body = { function: functionName };
+    if (Array.isArray(parameters)) body.parameters = parameters;
+    if (devMode) body.devMode = true;
+
+    return await callGoogleApi({
       method: 'POST',
-      headers
+      url: `${APPS_SCRIPT_BASE}/v1/scripts/${scriptId}:run`,
+      body,
+      label: 'SCRIPT_RUN'
     });
-
-    // Check if the response was successful
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData);
-    }
-
-    // Parse and return the response data
-    const data = await response.json();
-    return data;
   } catch (error) {
-    const errorDetails = {
-      message: error.message,
-      stack: error.stack,
-      scriptId,
-      timestamp: new Date().toISOString(),
-      errorType: error.name || 'Unknown'
-    };
-
-    logger.error('SCRIPT_RUN', 'Error running the script', errorDetails);
-    
-    console.error('❌ Error running the script:', errorDetails);
-    
-    // Return detailed error information for debugging
-    return { 
-      error: true,
-      message: error.message,
-      details: errorDetails,
-      rawError: {
-        name: error.name,
-        stack: error.stack
-      }
-    };
+    return toToolError(error, { scriptId, functionName });
   }
 };
 
-/**
- * Tool configuration for running Google Apps Script.
- * @type {Object}
- */
 const apiTool = {
   function: executeFunction,
   definition: {
     type: 'function',
     function: {
       name: 'script_run',
-      description: 'Run a Google Apps Script.',
+      description: 'Run a function in a Google Apps Script project. The script must be deployed as an API executable and share the calling OAuth client\'s Cloud project.',
       parameters: {
         type: 'object',
         properties: {
@@ -98,37 +47,21 @@ const apiTool = {
             type: 'string',
             description: 'The ID of the script to run.'
           },
-          fields: {
+          functionName: {
             type: 'string',
-            description: 'Selector specifying which fields to include in a partial response.'
+            description: 'The name of the function to execute.'
           },
-          alt: {
-            type: 'string',
-            enum: ['json', 'xml'],
-            description: 'Data format for response.'
+          parameters: {
+            type: 'array',
+            description: 'Parameters to pass to the function (JSON-compatible values).',
+            items: {}
           },
-          key: {
-            type: 'string',
-            description: 'API key for the project.'
-          },
-          access_token: {
-            type: 'string',
-            description: 'OAuth access token.'
-          },
-          oauth_token: {
-            type: 'string',
-            description: 'OAuth 2.0 token for the current user.'
-          },
-          quotaUser: {
-            type: 'string',
-            description: 'Available to use for quota purposes for server-side applications.'
-          },
-          prettyPrint: {
+          devMode: {
             type: 'boolean',
-            description: 'Returns response with indentations and line breaks.'
+            description: 'Run the latest saved (HEAD) code instead of the deployed version. Only works for the script owner.'
           }
         },
-        required: ['scriptId']
+        required: ['scriptId', 'functionName']
       }
     }
   }
