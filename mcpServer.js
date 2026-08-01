@@ -24,7 +24,7 @@ dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 const SERVER_NAME = "generated-mcp-server";
 
-async function transformTools(tools) {
+function transformTools(tools) {
   logger.info('SETUP', `Transforming ${tools.length} discovered tools`);
   const transformedTools = tools
     .map((tool) => {
@@ -51,12 +51,12 @@ async function transformTools(tools) {
 }
 
 async function setupServerHandlers(server, tools) {
+  // Tools are static for the process lifetime, so transform once and reuse
+  // rather than re-mapping on every ListTools request.
+  const transformedTools = transformTools(tools);
+
   server.setRequestHandler(ListToolsRequestSchema, async () => {
-    logger.info('REQUEST', 'Handling ListTools request');
-    const transformedTools = await transformTools(tools);
-    logger.info('REQUEST', `Returning ${transformedTools.length} available tools`, {
-      toolNames: transformedTools.map(t => t.name)
-    });
+    logger.info('REQUEST', `Handling ListTools request; returning ${transformedTools.length} tools`);
     return { tools: transformedTools };
   });
 
@@ -115,12 +115,15 @@ async function setupServerHandlers(server, tools) {
       // flag so a failed call is never mistaken for a successful one.
       const isError = !!(result && typeof result === 'object' && result.error);
 
+      // Serialize once and reuse for both the response body and log metrics.
+      const resultText = JSON.stringify(result, null, 2);
+
       logger.info('EXECUTION', `Tool execution completed`, {
         requestId,
         toolName,
         duration: `${duration}ms`,
         resultType: typeof result,
-        resultSize: JSON.stringify(result).length,
+        resultSize: resultText.length,
         isError
       });
 
@@ -135,7 +138,7 @@ async function setupServerHandlers(server, tools) {
         content: [
           {
             type: "text",
-            text: JSON.stringify(result, null, 2),
+            text: resultText,
           },
         ],
         isError,
@@ -193,9 +196,12 @@ async function run() {
     const app = express();
     const transports = {};
     const servers = {};
+    let sessionCounter = 0;
 
     app.get("/sse", async (_req, res) => {
-      const sessionId = Date.now().toString();
+      // Monotonic counter avoids the collision two connections in the same
+      // millisecond would hit with a Date.now()-based id.
+      const sessionId = `sse_${++sessionCounter}`;
       logger.info('SSE', `New SSE connection established`, { sessionId });
       
       // Create a new Server instance for each session
@@ -247,9 +253,14 @@ async function run() {
     });
 
     const port = process.env.PORT || 3001;
-    app.listen(port, () => {
-      logger.info('SSE', `SSE server running on port ${port}`);
-      console.log(`[SSE Server] running on port ${port}`);
+    // Bind to loopback by default: these endpoints are UNAUTHENTICATED and act
+    // with the user's Google OAuth token, so exposing them on a network
+    // interface would be an open proxy to their account. Override with
+    // SSE_HOST=0.0.0.0 only behind your own auth/proxy.
+    const host = process.env.SSE_HOST || '127.0.0.1';
+    app.listen(port, host, () => {
+      logger.info('SSE', `SSE server running on ${host}:${port}`);
+      console.error(`[SSE Server] running on ${host}:${port}`);
     });
   } else {
     // stdio mode: single server instance

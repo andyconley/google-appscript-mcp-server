@@ -32,8 +32,14 @@ const executeFunction = async ({ scriptId, deploymentId, deploymentConfig }) => 
     headers['Content-Type'] = 'application/json';
     headers['Accept'] = 'application/json';
 
-    // Prepare the body of the request
-    const requestBody = { deploymentConfig };
+    // Prepare the body of the request. Omit versionNumber entirely when it is
+    // not a number so the deployment tracks HEAD (the API treats a missing
+    // versionNumber as "latest saved content").
+    const cleanConfig = { ...deploymentConfig };
+    if (typeof cleanConfig.versionNumber !== 'number') {
+      delete cleanConfig.versionNumber;
+    }
+    const requestBody = { deploymentConfig: cleanConfig };
     const body = JSON.stringify(requestBody);
 
     logger.logAPICall('PUT', url, headers, requestBody);
@@ -150,14 +156,14 @@ const apiTool = {
               },
               versionNumber: {
                 type: 'integer',
-                description: 'The version number of the deployment.'
+                description: 'The version number to deploy. Omit to track HEAD (latest saved content).'
               },
               description: {
                 type: 'string',
                 description: 'A description of the deployment.'
               }
             },
-            required: ['manifestFileName', 'versionNumber', 'description']
+            required: ['manifestFileName']
           }
         },
         required: ['scriptId', 'deploymentId', 'deploymentConfig']

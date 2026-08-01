@@ -1,14 +1,14 @@
 {
-  "name": "postman-mcp-generator-mcp",
-  "version": "1.0.0",
-  "description": "A simple MCP server with packaged tools",
+  "name": "google-appscript-mcp-server",
+  "version": "1.1.0",
+  "description": "MCP server for the Google Apps Script API. Fork of mohalmah/google-appscript-mcp-server with OAuth/stdio/error-contract fixes and added web-app publish + project-discovery capabilities.",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "list-tools": "node index.js tools",
-    "test-oauth": "node test-oauth.js",
+    "test-oauth": "node scratch/test/test-oauth.js",
     "setup-oauth": "node oauth-setup.js",
-    "test-logging": "node test-logging.js",
+    "test-logging": "node scratch/test/test-logging.js",
     "start": "node mcpServer.js",
     "start-sse": "node mcpServer.js --sse",
     "debug": "LOG_LEVEL=debug node mcpServer.js",
@@ -25,6 +25,14 @@
   "engines": {
     "node": ">=16.0.0"
   },
-  "author": "Postman, Inc.",
+  "author": "Andy Conley",
+  "contributors": [
+    "mohalmah (original author) <https://github.com/mohalmah>",
+    "Postman, Inc. (initial codegen)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andyconley/google-appscript-mcp-server.git"
+  },
   "license": "MIT"
 }
