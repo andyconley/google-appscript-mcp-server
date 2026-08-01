@@ -109,14 +109,19 @@ async function setupServerHandlers(server, tools) {
 
       const result = await tool.function(args);
       const duration = Date.now() - startTime;
-      
-      logger.info('EXECUTION', `Tool execution completed successfully`, {
+
+      // Unified failure contract: tools signal failure by returning a
+      // truthy `error` field. Surface that to the client via MCP's isError
+      // flag so a failed call is never mistaken for a successful one.
+      const isError = !!(result && typeof result === 'object' && result.error);
+
+      logger.info('EXECUTION', `Tool execution completed`, {
         requestId,
         toolName,
         duration: `${duration}ms`,
         resultType: typeof result,
         resultSize: JSON.stringify(result).length,
-        hasError: !!result.error
+        isError
       });
 
       // Log detailed result for debugging
@@ -133,10 +138,11 @@ async function setupServerHandlers(server, tools) {
             text: JSON.stringify(result, null, 2),
           },
         ],
+        isError,
       };
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       logger.error('EXECUTION', `Tool execution failed`, {
         requestId,
         toolName,
@@ -148,12 +154,25 @@ async function setupServerHandlers(server, tools) {
         },
         args: args
       });
-      
-      console.error("[Error] Failed to fetch data:", error);
-      throw new McpError(
-        ErrorCode.InternalError,
-        `API error: ${error.message}`
-      );
+
+      console.error("[Error] Tool execution threw:", error);
+
+      // Return a model-visible error result (isError) rather than throwing a
+      // protocol-level McpError, so a thrown failure and a returned
+      // { error: true } failure look identical to the client.
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              { error: true, message: error.message, name: error.name },
+              null,
+              2
+            ),
+          },
+        ],
+        isError: true,
+      };
     }
   });
 }

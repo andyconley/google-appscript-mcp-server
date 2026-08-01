@@ -106,12 +106,16 @@ const executeFunction = async ({ scriptId, pageSize = 50, pageToken, fields, pre
     });
     
     console.error('Error listing deployments:', error);
-    return { 
-      error: 'An error occurred while listing deployments.',
+    return {
+      error: true,
+      message: error.message,
       details: {
-        message: error.message,
         scriptId,
         timestamp: new Date().toISOString()
+      },
+      rawError: {
+        name: error.name,
+        stack: error.stack
       }
     };
   }
