@@ -25,6 +25,21 @@ dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 const SERVER_NAME = "generated-mcp-server";
 
+// Summarize tool args for INFO logs: keys + sizes, never the values. Tool args
+// can be large (full script source in update_script_content) and sensitive
+// (secrets embedded in a user's script). Full args go to DEBUG only.
+function summarizeArgs(args) {
+  if (!args || typeof args !== 'object') return {};
+  const out = {};
+  for (const [key, value] of Object.entries(args)) {
+    if (typeof value === 'string') out[key] = `str(${value.length})`;
+    else if (Array.isArray(value)) out[key] = `array(${value.length})`;
+    else if (value && typeof value === 'object') out[key] = `object(${JSON.stringify(value).length}b)`;
+    else out[key] = value; // small scalars (numbers, booleans) are fine to show
+  }
+  return out;
+}
+
 function transformTools(tools) {
   logger.info('SETUP', `Transforming ${tools.length} discovered tools`);
   const transformedTools = tools
@@ -69,9 +84,10 @@ async function setupServerHandlers(server, state) {
     logger.info('REQUEST', `CallTool request received`, {
       requestId,
       toolName,
-      arguments: args,
+      args: summarizeArgs(args),
       timestamp: new Date().toISOString()
     });
+    logger.debug('REQUEST', `CallTool full arguments`, { requestId, toolName, arguments: args });
 
     const tool = state.tools.find((t) => t.definition.function.name === toolName);
     if (!tool) {
@@ -104,7 +120,7 @@ async function setupServerHandlers(server, state) {
       logger.info('EXECUTION', `Executing tool: ${toolName}`, {
         requestId,
         toolPath: tool.path,
-        validatedArgs: args
+        args: summarizeArgs(args)
       });
 
       const result = await tool.function(args);
@@ -155,7 +171,7 @@ async function setupServerHandlers(server, state) {
           stack: error.stack,
           name: error.name
         },
-        args: args
+        args: summarizeArgs(args)
       });
 
       console.error("[Error] Tool execution threw:", error);
