@@ -67,7 +67,7 @@ This fork keeps the full upstream toolset and adds the following. See the [fork 
 
 ## 🎥 Demo Video
 
-![Google Apps Script MCP Server Demo](https://github.com/mohalmah/google-appscript-mcp-server/blob/main/demo/google%20app%20script%20mcp%20demo.gif?raw=true)
+![Google Apps Script MCP Server Demo](https://github.com/andyconley/google-appscript-mcp-server/blob/main/demo/google%20app%20script%20mcp%20demo.gif?raw=true)
 
 *Watch the Google Apps Script MCP Server in action - creating projects, managing deployments, and executing scripts through VS Code AI Agent.*
 
@@ -101,8 +101,8 @@ Before starting, ensure you have:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/mohalmah/google-apps-script-mcp-server.git
-cd google-apps-script-mcp-server
+git clone https://github.com/andyconley/google-appscript-mcp-server.git
+cd google-appscript-mcp-server
 ```
 
 ### 2. Install Dependencies
@@ -129,8 +129,8 @@ npm start
 
 **Clone the repository:**
 ```bash
-git clone https://github.com/mohalmah/google-apps-script-mcp-server.git
-cd google-apps-script-mcp-server
+git clone https://github.com/andyconley/google-appscript-mcp-server.git
+cd google-appscript-mcp-server
 ```
 
 **Install dependencies:**
@@ -680,7 +680,7 @@ Example output: `/usr/local/bin/node` or `/opt/homebrew/bin/node`
 ```bash
 realpath mcpServer.js
 ```
-Example output: `/Users/username/google-apps-script-mcp-server/mcpServer.js`
+Example output: `/Users/username/google-appscript-mcp-server/mcpServer.js`
 
 **Alternative method:**
 ```bash
@@ -705,7 +705,7 @@ Example output: `/usr/bin/node` or `/usr/local/bin/node`
 ```bash
 realpath mcpServer.js
 ```
-Example output: `/home/username/google-apps-script-mcp-server/mcpServer.js`
+Example output: `/home/username/google-appscript-mcp-server/mcpServer.js`
 
 **Quick copy-paste command to get both paths:**
 ```bash
@@ -768,7 +768,7 @@ Ensure it shows `v18.0.0` or higher.
   "mcpServers": {
     "google-apps-script": {
       "command": "/usr/local/bin/node",
-      "args": ["/Users/username/google-apps-script-mcp-server/mcpServer.js"],
+      "args": ["/Users/username/google-appscript-mcp-server/mcpServer.js"],
       "env": {
         "GOOGLE_APP_SCRIPT_API_CLIENT_ID": "1234567890-abcdefghijk.apps.googleusercontent.com",
         "GOOGLE_APP_SCRIPT_API_CLIENT_SECRET": "GOCSPX-abcdefghijklmnopqrstuvwxyz"
@@ -872,7 +872,7 @@ Replace these paths with your actual system paths:
   "mcpServers": {
     "google-apps-script": {
       "command": "/usr/local/bin/node",
-      "args": ["/Users/username/google-apps-script-mcp-server/mcpServer.js"],
+      "args": ["/Users/username/google-appscript-mcp-server/mcpServer.js"],
       "env": {
         "GOOGLE_APP_SCRIPT_API_CLIENT_ID": "your_actual_client_id",
         "GOOGLE_APP_SCRIPT_API_CLIENT_SECRET": "your_actual_client_secret"
@@ -888,7 +888,7 @@ Replace these paths with your actual system paths:
   "mcpServers": {
     "google-apps-script": {
       "command": "/usr/bin/node",
-      "args": ["/home/username/google-apps-script-mcp-server/mcpServer.js"],
+      "args": ["/home/username/google-appscript-mcp-server/mcpServer.js"],
       "env": {
         "GOOGLE_APP_SCRIPT_API_CLIENT_ID": "your_actual_client_id",
         "GOOGLE_APP_SCRIPT_API_CLIENT_SECRET": "your_actual_client_secret"
