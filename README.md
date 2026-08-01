@@ -1096,7 +1096,10 @@ PORT=3001                        # OAuth callback port
 # Fork additions
 DEV_TOOLS=1                       # expose dev tools (auth_status, server_info, reload_tools); omit/0 to hide
 SSE_HOST=127.0.0.1               # SSE bind host; defaults to loopback (endpoints are unauthenticated)
+REQUEST_TIMEOUT_MS=45000         # per-request timeout for Google API calls (default 45s)
 ```
+
+**Reliability:** every Google API request goes through a shared client with a per-request timeout (`REQUEST_TIMEOUT_MS`) and bounded retry — `429` is retried for any method; `5xx`/network/timeout are retried only for idempotent `GET`s (so a retried write can't duplicate a create).
 
 #### Logging Levels
 - `debug`: Detailed debugging information
