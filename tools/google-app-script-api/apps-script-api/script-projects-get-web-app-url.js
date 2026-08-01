@@ -1,4 +1,4 @@
-import { callGoogleApi, toToolError, APPS_SCRIPT_BASE } from '../../../lib/appsScriptClient.js';
+import { callGoogleApi, toToolError, APPS_SCRIPT_BASE, enc } from '../../../lib/appsScriptClient.js';
 
 /**
  * Return the web app /exec URL(s) and access config for a script project.
@@ -18,14 +18,14 @@ const executeFunction = async ({ scriptId, deploymentId }) => {
     if (deploymentId) {
       const one = await callGoogleApi({
         method: 'GET',
-        url: `${APPS_SCRIPT_BASE}/v1/projects/${scriptId}/deployments/${deploymentId}`,
+        url: `${APPS_SCRIPT_BASE}/v1/projects/${enc(scriptId)}/deployments/${enc(deploymentId)}`,
         label: 'GET_WEBAPP_URL'
       });
       deployments = [one];
     } else {
       const list = await callGoogleApi({
         method: 'GET',
-        url: `${APPS_SCRIPT_BASE}/v1/projects/${scriptId}/deployments`,
+        url: `${APPS_SCRIPT_BASE}/v1/projects/${enc(scriptId)}/deployments`,
         label: 'GET_WEBAPP_URL'
       });
       deployments = list.deployments || [];

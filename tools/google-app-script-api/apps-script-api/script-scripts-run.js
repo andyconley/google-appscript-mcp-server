@@ -1,4 +1,4 @@
-import { callGoogleApi, toToolError, APPS_SCRIPT_BASE } from '../../../lib/appsScriptClient.js';
+import { callGoogleApi, toToolError, APPS_SCRIPT_BASE, enc } from '../../../lib/appsScriptClient.js';
 
 /**
  * Run a function in a Google Apps Script project (scripts.run).
@@ -24,7 +24,7 @@ const executeFunction = async ({ scriptId, functionName, parameters, devMode = f
 
     return await callGoogleApi({
       method: 'POST',
-      url: `${APPS_SCRIPT_BASE}/v1/scripts/${scriptId}:run`,
+      url: `${APPS_SCRIPT_BASE}/v1/scripts/${enc(scriptId)}:run`,
       body,
       label: 'SCRIPT_RUN'
     });

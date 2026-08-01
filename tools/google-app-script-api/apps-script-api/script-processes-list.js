@@ -1,8 +1,7 @@
-import { getAuthHeaders } from '../../../lib/oauth-helper.js';
-import { logger } from '../../../lib/logger.js';
+import { callGoogleApi, toToolError, APPS_SCRIPT_BASE } from '../../../lib/appsScriptClient.js';
 
 /**
- * Function to list processes for a Google Apps Script project.
+ * List processes for a Google Apps Script project.
  *
  * @param {Object} args - Arguments for the process listing.
  * @param {string} args.scriptId - The ID of the script to filter processes.
@@ -16,8 +15,7 @@ import { logger } from '../../../lib/logger.js';
  * @param {Array<string>} [args.userAccessLevels] - User access levels to filter.
  * @param {number} [args.pageSize=100] - The number of processes to return per page.
  * @param {string} [args.endTime] - The end time for filtering processes.
- * @param {string} [args.fields] - Selector specifying which fields to include in a partial response.
- * @param {boolean} [args.prettyPrint=true] - Returns response with indentations and line breaks.
+ * @param {string} [args.fields] - Partial-response field selector.
  * @returns {Promise<Object>} - The result of the process listing.
  */
 const executeFunction = async ({
@@ -32,125 +30,31 @@ const executeFunction = async ({
   userAccessLevels,
   pageSize = 100,
   endTime,
-  fields,
-  prettyPrint = true
+  fields
 }) => {
-  const baseUrl = 'https://script.googleapis.com';
-  const startTime_exec = Date.now();
-
-  logger.info('API_CALL', 'Starting script processes list request', {
-    scriptId,
-    pageSize,
-    startTime,
-    endTime,
-    functionName,
-    deploymentId,
-    baseUrl
-  });
-
   try {
-    // Validate required parameters
-    if (!scriptId) {
-      logger.error('API_CALL', 'Missing required parameter: scriptId');
-      throw new Error('scriptId is required');
-    }
-
-    // Construct the URL with query parameters
-    const url = new URL(`${baseUrl}/v1/processes`);
-    const params = new URLSearchParams();
-    params.append('userProcessFilter.scriptId', scriptId);
-    if (startTime) params.append('userProcessFilter.startTime', startTime);
-    if (functionName) params.append('userProcessFilter.functionName', functionName);
-    if (deploymentId) params.append('userProcessFilter.deploymentId', deploymentId);
-    if (projectName) params.append('userProcessFilter.projectName', projectName);
-    if (statuses) params.append('userProcessFilter.statuses', statuses.join(','));
-    if (pageToken) params.append('pageToken', pageToken);
-    if (types) params.append('userProcessFilter.types', types.join(','));
-    if (userAccessLevels) params.append('userProcessFilter.userAccessLevels', userAccessLevels.join(','));
-    if (endTime) params.append('userProcessFilter.endTime', endTime);
-    if (fields) params.append('fields', fields);
-    params.append('pageSize', pageSize);
-    params.append('prettyPrint', prettyPrint);
-    
-    url.search = params.toString();
-
-    logger.debug('API_CALL', 'Constructed API URL', {
-      url: url.toString(),
-      queryParams: Object.fromEntries(params)
-    });
-
-    // Get OAuth headers
-    logger.debug('API_CALL', 'Getting OAuth headers');
-    const headers = await getAuthHeaders();
-
-    logger.logAPICall('GET', url.toString(), headers);
-
-    // Perform the fetch request
-    const fetchStartTime = Date.now();
-    const response = await fetch(url.toString(), {
+    if (!scriptId) throw new Error('scriptId is required');
+    return await callGoogleApi({
       method: 'GET',
-      headers
+      url: `${APPS_SCRIPT_BASE}/v1/processes`,
+      query: {
+        'userProcessFilter.scriptId': scriptId,
+        'userProcessFilter.startTime': startTime,
+        'userProcessFilter.functionName': functionName,
+        'userProcessFilter.deploymentId': deploymentId,
+        'userProcessFilter.projectName': projectName,
+        'userProcessFilter.statuses': statuses ? statuses.join(',') : undefined,
+        pageToken,
+        'userProcessFilter.types': types ? types.join(',') : undefined,
+        'userProcessFilter.userAccessLevels': userAccessLevels ? userAccessLevels.join(',') : undefined,
+        'userProcessFilter.endTime': endTime,
+        fields,
+        pageSize
+      },
+      label: 'SCRIPT_PROCESSES_LIST'
     });
-    
-    const fetchDuration = Date.now() - fetchStartTime;
-    const responseSize = response.headers.get('content-length') || 'unknown';
-    
-    logger.logAPIResponse('GET', url.toString(), response.status, fetchDuration, responseSize);
-
-    // Check if the response was successful
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorData;
-      
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (parseError) {
-        errorData = { message: errorText };
-      }
-
-      logger.error('API_CALL', 'API request failed', {
-        status: response.status,
-        statusText: response.statusText,
-        url: url.toString(),
-        errorResponse: errorData,
-        scriptId
-      });
-      
-      throw new Error(`API Error (${response.status}): ${errorData.error?.message || errorData.message || 'Unknown error'}`);
-    }
-
-    // Parse and return the response data
-    const data = await response.json();
-    const totalDuration = Date.now() - startTime_exec;
-    
-    logger.info('API_CALL', 'Script processes list request completed successfully', {
-      scriptId,
-      processCount: data.processes ? data.processes.length : 0,
-      hasNextPageToken: !!data.nextPageToken,
-      totalDuration: `${totalDuration}ms`,
-      responseSize: JSON.stringify(data).length
-    });
-    
-    return data;
   } catch (error) {
-    logger.error('API_CALL', 'Script processes list request failed', {
-      scriptId,
-      error: {
-        message: error.message,
-        stack: error.stack
-      }
-    });
-    
-    console.error('Error listing processes:', error);
-    return { 
-      error: true,
-      message: error.message,
-      details: {
-        scriptId,
-        timestamp: new Date().toISOString(),
-        errorType: error.name || 'Unknown'
-      }
-    };
+    return toToolError(error, { scriptId });
   }
 };
 

@@ -1,4 +1,4 @@
-import { callGoogleApi, toToolError, APPS_SCRIPT_BASE } from '../../../lib/appsScriptClient.js';
+import { callGoogleApi, toToolError, APPS_SCRIPT_BASE, enc } from '../../../lib/appsScriptClient.js';
 import { logger } from '../../../lib/logger.js';
 
 /**
@@ -26,7 +26,7 @@ const executeFunction = async ({ scriptId, deploymentId, description, files }) =
       logger.info('PUBLISH_WEBAPP', 'Updating project content before publishing', { scriptId, fileCount: files.length });
       await callGoogleApi({
         method: 'PUT',
-        url: `${APPS_SCRIPT_BASE}/v1/projects/${scriptId}/content`,
+        url: `${APPS_SCRIPT_BASE}/v1/projects/${enc(scriptId)}/content`,
         body: { files },
         label: 'PUBLISH_WEBAPP'
       });
@@ -35,7 +35,7 @@ const executeFunction = async ({ scriptId, deploymentId, description, files }) =
     // 2. Create a new version from the current (saved) content.
     const version = await callGoogleApi({
       method: 'POST',
-      url: `${APPS_SCRIPT_BASE}/v1/projects/${scriptId}/versions`,
+      url: `${APPS_SCRIPT_BASE}/v1/projects/${enc(scriptId)}/versions`,
       body: description ? { description } : {},
       label: 'PUBLISH_WEBAPP'
     });
@@ -43,7 +43,7 @@ const executeFunction = async ({ scriptId, deploymentId, description, files }) =
     // 3. Repoint the existing deployment to the new version (URL unchanged).
     const deployment = await callGoogleApi({
       method: 'PUT',
-      url: `${APPS_SCRIPT_BASE}/v1/projects/${scriptId}/deployments/${deploymentId}`,
+      url: `${APPS_SCRIPT_BASE}/v1/projects/${enc(scriptId)}/deployments/${enc(deploymentId)}`,
       body: {
         deploymentConfig: {
           manifestFileName: 'appsscript',

@@ -1,101 +1,24 @@
-import { getAuthHeaders } from '../../../lib/oauth-helper.js';
+import { callGoogleApi, toToolError, APPS_SCRIPT_BASE } from '../../../lib/appsScriptClient.js';
 
 /**
- * Function to create a new Google Apps Script project.
- * OAuth authentication is handled automatically.
+ * Create a new Google Apps Script project.
  *
- * @param {Object} args - Arguments for creating the script project.
- * @param {string} args.parentId - The ID of the parent project.
+ * @param {Object} args
  * @param {string} args.title - The title of the new script project.
- * @returns {Promise<Object>} - The result of the project creation.
+ * @param {string} [args.parentId] - The ID of the parent project.
+ * @returns {Promise<Object>} The created project.
  */
 const executeFunction = async ({ parentId, title }) => {
-  const baseUrl = 'https://script.googleapis.com';
-
   try {
-    console.error('🔨 Creating new Google Apps Script project:', title);
-    
-    // Validate required parameters
-    if (!title) {
-      throw new Error('title is required');
-    }
-
-    const projectData = {
-      title
-    };
-
-    // Add parentId if provided
-    if (parentId) {
-      projectData.parentId = parentId;
-    }
-
-    // Construct the URL for the API request
-    const url = new URL(`${baseUrl}/v1/projects`);
-    console.error('🌐 API URL:', url.toString());
-
-    // Get OAuth headers
-    const headers = await getAuthHeaders();
-    headers['Content-Type'] = 'application/json';
-    console.error('🔐 Authorization headers obtained successfully');
-
-    // Perform the fetch request
-    const response = await fetch(url.toString(), {
+    if (!title) throw new Error('title is required');
+    return await callGoogleApi({
       method: 'POST',
-      headers,
-      body: JSON.stringify(projectData)
+      url: `${APPS_SCRIPT_BASE}/v1/projects`,
+      body: { title, ...(parentId ? { parentId } : {}) },
+      label: 'PROJECTS_CREATE'
     });
-
-    console.error('📡 API Response Status:', response.status, response.statusText);
-
-    // Check if the response was successful
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorData;
-      
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (parseError) {
-        errorData = { message: errorText };
-      }
-
-      const detailedError = {
-        status: response.status,
-        statusText: response.statusText,
-        url: url.toString(),
-        error: errorData,
-        timestamp: new Date().toISOString()
-      };
-
-      console.error('❌ API Error Details:', JSON.stringify(detailedError, null, 2));
-      
-      throw new Error(`API Error (${response.status}): ${errorData.error?.message || errorData.message || 'Unknown error'}`);
-    }
-
-    // Parse and return the response data
-    const data = await response.json();
-    console.error('✅ Successfully created script project');
-    return data;
-    
   } catch (error) {
-    console.error('❌ Error creating script project:', {
-      message: error.message,
-      stack: error.stack,
-      title,
-      parentId,
-      timestamp: new Date().toISOString()
-    });
-    
-    // Return detailed error information for debugging
-    return { 
-      error: true,
-      message: error.message,
-      details: {
-        title,
-        parentId,
-        timestamp: new Date().toISOString(),
-        errorType: error.name || 'Unknown'
-      }
-    };
+    return toToolError(error, { title, parentId });
   }
 };
 

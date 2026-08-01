@@ -1,8 +1,7 @@
-import { getOAuthAccessToken } from '../../../lib/oauth-helper.js';
-import { logger } from '../../../lib/logger.js';
+import { callGoogleApi, toToolError, APPS_SCRIPT_BASE, enc } from '../../../lib/appsScriptClient.js';
 
 /**
- * Function to update the content of a Google Apps Script project.
+ * Update the content of a Google Apps Script project.
  *
  * @param {Object} args - Arguments for the update.
  * @param {string} args.scriptId - The ID of the script project to update.
@@ -10,112 +9,16 @@ import { logger } from '../../../lib/logger.js';
  * @returns {Promise<Object>} - The result of the update operation.
  */
 const executeFunction = async ({ scriptId, files }) => {
-  const baseUrl = 'https://script.googleapis.com';
-  const startTime = Date.now();
-
   try {
-    logger.info('SCRIPT_UPDATE_CONTENT', 'Starting script content update', { 
-      scriptId, 
-      filesCount: files?.length || 0 
-    });
-
-    // Get OAuth access token
-    const token = await getOAuthAccessToken();
-    
-    // Construct the URL for the request
-    const url = `${baseUrl}/v1/projects/${scriptId}/content`;
-
-    // Set up headers for the request
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    };
-
-    // Prepare the body of the request
-    const requestBody = { scriptId, files };
-    const body = JSON.stringify(requestBody);
-
-    logger.logAPICall('PUT', url, headers, requestBody);
-
-    // Perform the fetch request
-    const fetchStartTime = Date.now();
-    const response = await fetch(url, {
+    if (!scriptId) throw new Error('scriptId is required');
+    return await callGoogleApi({
       method: 'PUT',
-      headers,
-      body
+      url: `${APPS_SCRIPT_BASE}/v1/projects/${enc(scriptId)}/content`,
+      body: { files },
+      label: 'SCRIPT_UPDATE_CONTENT'
     });
-    
-    const fetchDuration = Date.now() - fetchStartTime;
-    const responseSize = response.headers.get('content-length') || 'unknown';
-    
-    logger.logAPIResponse('PUT', url, response.status, fetchDuration, responseSize);
-
-    // Check if the response was successful
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorData;
-      
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (parseError) {
-        errorData = { message: errorText };
-      }
-
-      const detailedError = {
-        status: response.status,
-        statusText: response.statusText,
-        url,
-        errorResponse: errorData,
-        duration: Date.now() - startTime,
-        scriptId,
-        filesCount: files?.length || 0,
-        timestamp: new Date().toISOString()
-      };
-
-      logger.error('SCRIPT_UPDATE_CONTENT', 'API request failed', detailedError);
-      
-      console.error('❌ API Error Details:', JSON.stringify(detailedError, null, 2));
-      
-      throw new Error(`API Error (${response.status}): ${errorData.error?.message || errorData.message || 'Unknown error'}`);
-    }
-
-    // Parse and return the response data
-    const data = await response.json();
-    
-    logger.info('SCRIPT_UPDATE_CONTENT', 'Successfully updated script content', {
-      scriptId,
-      filesCount: files?.length || 0,
-      duration: Date.now() - startTime
-    });
-    
-    console.error('✅ Successfully updated script content');
-    return data;
   } catch (error) {
-    const errorDetails = {
-      message: error.message,
-      stack: error.stack,
-      scriptId,
-      filesCount: files?.length || 0,
-      duration: Date.now() - startTime,
-      timestamp: new Date().toISOString(),
-      errorType: error.name || 'Unknown'
-    };
-
-    logger.error('SCRIPT_UPDATE_CONTENT', 'Error updating script project content', errorDetails);
-    
-    console.error('❌ Error updating script project content:', errorDetails);
-    
-    // Return detailed error information for debugging
-    return { 
-      error: true,
-      message: error.message,
-      details: errorDetails,
-      rawError: {
-        name: error.name,
-        stack: error.stack
-      }
-    };
+    return toToolError(error, { scriptId, filesCount: files?.length || 0 });
   }
 };
 

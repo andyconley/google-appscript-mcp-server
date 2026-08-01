@@ -1,73 +1,26 @@
-import { getAuthHeaders } from '../../../lib/oauth-helper.js';
-import { logger } from '../../../lib/logger.js';
+import { callGoogleApi, toToolError, APPS_SCRIPT_BASE, enc } from '../../../lib/appsScriptClient.js';
 
 /**
- * Function to get a version of a Google Apps Script project.
+ * Get a version of a Google Apps Script project.
  *
  * @param {Object} args - Arguments for the request.
  * @param {string} args.scriptId - The ID of the script project.
  * @param {string} args.versionNumber - The version number of the script project.
- * @param {string} [args.fields] - Selector specifying which fields to include in a partial response.
- * @param {string} [args.alt='json'] - Data format for response.
- * @param {string} [args.key] - API key for the project.
- * @param {string} [args.access_token] - OAuth access token.
- * @param {string} [args.quotaUser] - Available to use for quota purposes for server-side applications.
- * @param {string} [args.oauth_token] - OAuth 2.0 token for the current user.
- * @param {string} [args.callback] - JSONP callback.
- * @param {boolean} [args.prettyPrint=true] - Returns response with indentations and line breaks.
- * @returns {Promise<Object>} - The result of the script version retrieval.
+ * @param {string} [args.fields] - Partial-response field selector.
+ * @returns {Promise<Object>} - The script version.
  */
-const executeFunction = async ({ scriptId, versionNumber, fields, alt = 'json', key, access_token, quotaUser, oauth_token, callback, prettyPrint = true }) => {
-  const baseUrl = 'https://script.googleapis.com';
-  const url = new URL(`${baseUrl}/v1/projects/${scriptId}/versions/${versionNumber}`);
-
-  // Append query parameters
-  const params = new URLSearchParams({ prettyPrint: prettyPrint.toString() });
-  if (fields) params.append('fields', fields);
-
-  // Perform the fetch request
+const executeFunction = async ({ scriptId, versionNumber, fields }) => {
   try {
-    // Set up headers for the request (OAuth, matching the working read/create tools)
-    const headers = await getAuthHeaders();
-
-    const response = await fetch(`${url}?${params.toString()}`, {
+    if (!scriptId) throw new Error('scriptId is required');
+    if (versionNumber === undefined || versionNumber === null) throw new Error('versionNumber is required');
+    return await callGoogleApi({
       method: 'GET',
-      headers
+      url: `${APPS_SCRIPT_BASE}/v1/projects/${enc(scriptId)}/versions/${enc(versionNumber)}`,
+      query: { fields },
+      label: 'VERSION_GET'
     });
-
-    // Check if the response was successful
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData);
-    }
-
-    // Parse and return the response data
-    const data = await response.json();
-    return data;
   } catch (error) {
-    const errorDetails = {
-      message: error.message,
-      stack: error.stack,
-      scriptId,
-      versionNumber,
-      timestamp: new Date().toISOString(),
-      errorType: error.name || 'Unknown'
-    };
-
-    logger.error('VERSION_GET', 'Error retrieving script version', errorDetails);
-    
-    console.error('❌ Error retrieving script version:', errorDetails);
-    
-    // Return detailed error information for debugging
-    return { 
-      error: true,
-      message: error.message,
-      details: errorDetails,
-      rawError: {
-        name: error.name,
-        stack: error.stack
-      }
-    };
+    return toToolError(error, { scriptId, versionNumber });
   }
 };
 
