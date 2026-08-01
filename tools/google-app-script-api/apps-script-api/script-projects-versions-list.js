@@ -98,7 +98,7 @@ const executeFunction = async ({ scriptId, pageSize = 100, pageToken, fields, ke
       duration: Date.now() - startTime
     });
     
-    console.log('✅ Successfully retrieved script versions');
+    console.error('✅ Successfully retrieved script versions');
     return data;
   } catch (error) {
     const errorDetails = {

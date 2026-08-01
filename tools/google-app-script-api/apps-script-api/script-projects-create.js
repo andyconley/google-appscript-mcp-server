@@ -13,7 +13,7 @@ const executeFunction = async ({ parentId, title }) => {
   const baseUrl = 'https://script.googleapis.com';
 
   try {
-    console.log('🔨 Creating new Google Apps Script project:', title);
+    console.error('🔨 Creating new Google Apps Script project:', title);
     
     // Validate required parameters
     if (!title) {
@@ -31,12 +31,12 @@ const executeFunction = async ({ parentId, title }) => {
 
     // Construct the URL for the API request
     const url = new URL(`${baseUrl}/v1/projects`);
-    console.log('🌐 API URL:', url.toString());
+    console.error('🌐 API URL:', url.toString());
 
     // Get OAuth headers
     const headers = await getAuthHeaders();
     headers['Content-Type'] = 'application/json';
-    console.log('🔐 Authorization headers obtained successfully');
+    console.error('🔐 Authorization headers obtained successfully');
 
     // Perform the fetch request
     const response = await fetch(url.toString(), {
@@ -45,7 +45,7 @@ const executeFunction = async ({ parentId, title }) => {
       body: JSON.stringify(projectData)
     });
 
-    console.log('📡 API Response Status:', response.status, response.statusText);
+    console.error('📡 API Response Status:', response.status, response.statusText);
 
     // Check if the response was successful
     if (!response.ok) {
@@ -73,7 +73,7 @@ const executeFunction = async ({ parentId, title }) => {
 
     // Parse and return the response data
     const data = await response.json();
-    console.log('✅ Successfully created script project');
+    console.error('✅ Successfully created script project');
     return data;
     
   } catch (error) {

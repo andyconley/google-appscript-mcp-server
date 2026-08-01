@@ -16,7 +16,7 @@ const executeFunction = async ({ scriptId, fields, alt = 'json', quotaUser, pret
   const baseUrl = 'https://script.googleapis.com';
 
   try {
-    console.log('🔍 Getting script project metadata for:', scriptId);
+    console.error('🔍 Getting script project metadata for:', scriptId);
     
     // Validate required parameters
     if (!scriptId) {
@@ -32,11 +32,11 @@ const executeFunction = async ({ scriptId, fields, alt = 'json', quotaUser, pret
     if (quotaUser) url.searchParams.append('quotaUser', quotaUser);
     if (prettyPrint !== undefined) url.searchParams.append('prettyPrint', prettyPrint.toString());
 
-    console.log('🌐 API URL:', url.toString());
+    console.error('🌐 API URL:', url.toString());
 
     // Get OAuth headers - this automatically handles token refresh
     const headers = await getAuthHeaders();
-    console.log('🔐 Authorization headers obtained successfully');
+    console.error('🔐 Authorization headers obtained successfully');
 
     // Perform the fetch request
     const response = await fetch(url.toString(), {
@@ -44,7 +44,7 @@ const executeFunction = async ({ scriptId, fields, alt = 'json', quotaUser, pret
       headers
     });
 
-    console.log('📡 API Response Status:', response.status, response.statusText);
+    console.error('📡 API Response Status:', response.status, response.statusText);
 
     // Check if the response was successful
     if (!response.ok) {
@@ -72,7 +72,7 @@ const executeFunction = async ({ scriptId, fields, alt = 'json', quotaUser, pret
 
     // Parse and return the response data
     const data = await response.json();
-    console.log('✅ Successfully retrieved script project metadata');
+    console.error('✅ Successfully retrieved script project metadata');
     return data;
     
   } catch (error) {

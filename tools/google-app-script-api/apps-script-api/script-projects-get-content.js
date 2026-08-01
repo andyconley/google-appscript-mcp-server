@@ -97,7 +97,7 @@ const executeFunction = async ({ scriptId, versionNumber, fields, alt = "json", 
       duration: Date.now() - startTime
     });
     
-    console.log('✅ Successfully retrieved script content');
+    console.error('✅ Successfully retrieved script content');
     return data;
   } catch (error) {
     const errorDetails = {

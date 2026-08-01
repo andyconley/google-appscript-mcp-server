@@ -83,7 +83,7 @@ const executeFunction = async ({ scriptId, manifestFileName, versionNumber, desc
       duration: Date.now() - startTime
     });
     
-    console.log('✅ Successfully created deployment');
+    console.error('✅ Successfully created deployment');
     return data;
   } catch (error) {
     const errorDetails = {

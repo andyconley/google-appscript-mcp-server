@@ -89,7 +89,7 @@ const executeFunction = async ({ scriptId, files }) => {
       duration: Date.now() - startTime
     });
     
-    console.log('✅ Successfully updated script content');
+    console.error('✅ Successfully updated script content');
     return data;
   } catch (error) {
     const errorDetails = {

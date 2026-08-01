@@ -85,7 +85,7 @@ const executeFunction = async ({ scriptId, description }) => {
       duration: Date.now() - startTime
     });
     
-    console.log('✅ Successfully created version');
+    console.error('✅ Successfully created version');
     return data;
   } catch (error) {
     const errorDetails = {
