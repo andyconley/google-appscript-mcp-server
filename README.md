@@ -176,14 +176,18 @@ npm install
 
 **Configure Scopes (Optional but Recommended):**
 1. Click **"Add or Remove Scopes"**
-2. Add these scopes:
+2. Add these scopes (this is the full set the server requests — see [OAuth Scopes Reference](#oauth-scopes-reference) for which tool needs which):
    - `https://www.googleapis.com/auth/script.projects`
    - `https://www.googleapis.com/auth/script.projects.readonly`
    - `https://www.googleapis.com/auth/script.deployments`
    - `https://www.googleapis.com/auth/script.deployments.readonly`
    - `https://www.googleapis.com/auth/script.metrics`
    - `https://www.googleapis.com/auth/script.processes`
+   - `https://www.googleapis.com/auth/script.webapp.deploy`
+   - `https://www.googleapis.com/auth/drive.metadata.readonly`
 3. Click **"Update"**
+
+> You can grant a subset for least privilege — e.g. a read-only user needs only the `.readonly` scopes. See the [OAuth Scopes Reference](#oauth-scopes-reference) table below. Run `auth_status` (with `DEV_TOOLS=1`) to see granted vs. missing scopes at any time.
 
 **Add Test Users (for External apps):**
 1. Click **"Add Users"**
@@ -519,6 +523,37 @@ Hidden unless `DEV_TOOLS=1` (see [Environment Variables](#environment-variables)
 | **Fork: Web App** | publish_web_app, get_web_app_url | Publish and inspect web app deployments |
 | **Fork: Discovery** | list_script_projects | Find projects by name (Drive) |
 | **Fork: Dev** *(DEV_TOOLS=1)* | auth_status, server_info, reload_tools | Diagnostics and hot-reload |
+
+### OAuth Scopes Reference
+
+Which scope each tool needs. Scopes are per Google's Apps Script API reference (each method's authoritative scope list lives in Google's docs); a **read** operation also works with the corresponding broader **write** scope, so the read-only scopes matter only if you're granting least privilege. Run `auth_status` (`DEV_TOOLS=1`) to see granted vs. missing at any time.
+
+| Tool | API operation | Required scope |
+|------|---------------|----------------|
+| `script_projects_create` | projects.create | `script.projects` |
+| `update_script_content` | projects.updateContent | `script.projects` |
+| `script_projects_versions_create` | projects.versions.create | `script.projects` |
+| `script_projects_get` | projects.get | `script.projects.readonly` |
+| `script_projects_get_content` | projects.getContent | `script.projects.readonly` |
+| `script_projects_versions_get` | projects.versions.get | `script.projects.readonly` |
+| `script_projects_versions_list` | projects.versions.list | `script.projects.readonly` |
+| `script_projects_deployments_create` | deployments.create | `script.deployments` |
+| `script_projects_deployments_update` | deployments.update | `script.deployments` |
+| `script_projects_deployments_delete` | deployments.delete | `script.deployments` |
+| `script_projects_deployments_get` | deployments.get | `script.deployments.readonly` |
+| `script_projects_deployments_list` | deployments.list | `script.deployments.readonly` |
+| `get_script_metrics` | projects.getMetrics | `script.metrics` |
+| `script_processes_list` | processes.list | `script.processes` |
+| `list_script_processes` | processes.listScriptProcesses | `script.processes` |
+| `script_run` | scripts.run | The scopes the **target script itself** uses (not a fixed API scope). The script must also share the calling OAuth client's Cloud project. |
+| `publish_web_app` *(fork)* | updateContent + versions.create + deployments.update | `script.projects` + `script.deployments` (web-app entry points also use `script.webapp.deploy`) |
+| `get_web_app_url` *(fork)* | deployments.get/list | `script.deployments.readonly` |
+| `list_script_projects` *(fork)* | Drive files.list | `drive.metadata.readonly` |
+| `auth_status`, `server_info`, `reload_tools` *(fork, dev)* | local only | none |
+
+**Least-privilege presets:**
+- **Read-only:** `script.projects.readonly`, `script.deployments.readonly`, `script.processes`, `script.metrics`, `drive.metadata.readonly`
+- **Full (deploy/publish):** add `script.projects`, `script.deployments`, `script.webapp.deploy`
 
 ### Common Use Cases
 
