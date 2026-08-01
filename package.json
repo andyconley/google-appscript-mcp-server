@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "list-tools": "node index.js tools",
-    "test-oauth": "node scratch/test/test-oauth.js",
+    "test": "LOG_LEVEL=error node --test test/*.test.js",
+    "test:integration": "LOG_LEVEL=error RUN_INTEGRATION=1 node --test test/integration.test.js",
     "setup-oauth": "node oauth-setup.js",
-    "test-logging": "node scratch/test/test-logging.js",
     "start": "node mcpServer.js",
     "start-sse": "node mcpServer.js --sse",
     "debug": "LOG_LEVEL=debug node mcpServer.js",

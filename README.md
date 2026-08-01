@@ -27,6 +27,7 @@ This MCP server provides comprehensive integration with the Google Apps Script A
 - [Detailed Setup Instructions](#detailed-setup-instructions)
 - [Available Tools](#available-tools)
 - [MCP Client Configuration](#mcp-client-configuration)
+- [Testing](#-testing)
 - [Troubleshooting](#troubleshooting)
 - [Advanced Usage](#advanced-usage)
 
@@ -902,6 +903,28 @@ Replace these paths with your actual system paths:
 2. Update the paths based on your actual system output from the commands above
 3. Use your actual username instead of `username` in the paths
 4. Ensure you've run `npm run setup-oauth` before configuring MCP clients
+
+## 🧪 Testing
+
+Tests use the built-in Node test runner (`node --test`) — no extra dependencies.
+
+```bash
+npm test                 # hermetic unit + contract tests (no credentials, no network)
+npm run test:integration # opt-in live tests against the Google API (see below)
+```
+
+**What the hermetic suite covers:**
+- **Schema / contract** — every registered tool loads with a valid, unique schema (a tool that fails to import is caught here); dev tools are hidden unless `DEV_TOOLS=1`.
+- **Request shaping** — each tool builds the expected method / URL (with URL-encoded ids) / query / body, and returns the standard `{ error: true }` shape on failure. Auth and `fetch` are mocked, so these run fully offline.
+- **Client & token manager** — URL building, array-query expansion, error parsing, request timeout, retry policy (429 for any method; 5xx/timeout for idempotent GETs only), single-flight refresh, and the token cache.
+
+**Opt-in integration tests** hit the live Google API and are **skipped by default**. Authorize first (`node oauth-setup.js`), then:
+
+```bash
+RUN_INTEGRATION=1 INTEGRATION_SCRIPT_ID=<a scriptId you can read> npm run test:integration
+```
+
+CI (GitHub Actions, `.github/workflows/ci.yml`) runs the hermetic suite and `npm audit --audit-level=high` on every push and pull request.
 
 ## 🔍 Troubleshooting
 
