@@ -13,9 +13,7 @@
 > - **Unified failure contract** — tool failures are surfaced via MCP's `isError` flag instead of being returned as success payloads.
 > - **Single-flight token refresh** — concurrent tool calls near token expiry no longer each fire their own refresh (which could race and invalidate each other).
 
-Welcome to the Google Apps Script MCP (Model Context Protocol) Server! 🚀 
-
-This MCP server provides comprehensive integration with the Google Apps Script API, allowing you to manage script projects, deployments, versions, and executions through any MCP-compatible client like Claude Desktop, VS Code with Cline, or Postman.
+An MCP (Model Context Protocol) server for the Google Apps Script API. Manage script projects, deployments, versions, and executions from any MCP client — Claude Desktop, VS Code with Cline, or Postman.
 
 ## 📋 Table of Contents
 
@@ -33,14 +31,12 @@ This MCP server provides comprehensive integration with the Google Apps Script A
 
 ## 🌟 Overview
 
-This MCP server enables seamless interaction with Google Apps Script through:
+What you get:
 
-- ✅ **OAuth 2.0 Authentication** - Secure token management with automatic refresh
-- ✅ **16 Comprehensive Tools** - Complete Google Apps Script API coverage
-- ✅ **MCP Protocol Compliance** - Works with Claude Desktop, VS Code, and other MCP clients
-- ✅ **Secure Token Storage** - OS-specific secure storage for refresh tokens
-- ✅ **Auto Token Refresh** - Handles token expiration automatically
-- ✅ **Detailed Logging** - Comprehensive error handling and debugging
+- **OAuth 2.0** — refresh token stored in an OS-specific dir at file mode `600`, refreshed automatically
+- **Full Apps Script REST API coverage** — plus the tools this fork adds (below)
+- **Works with any MCP client** — Claude Desktop, VS Code, Postman
+- **Structured logging** — to stderr, with adjustable levels
 
 ## 🍴 What This Fork Adds
 
@@ -82,11 +78,11 @@ This fork keeps the full upstream toolset and adds the following. See the [fork 
 - **Metrics Access**: Retrieve script execution metrics and analytics
 - **Script Execution**: Run Google Apps Script functions remotely
 
-### Security Features
-- **OAuth 2.0 Flow**: Full Google OAuth implementation
-- **Secure Token Storage**: Refresh tokens stored in OS keychain/credential manager
-- **Automatic Token Refresh**: No manual token management required
-- **Environment Variable Support**: Secure credential configuration
+### Security
+- **OAuth 2.0**: full Google OAuth flow
+- **Token storage**: refresh token written to an OS-specific dir at file mode `600` (not the OS keychain)
+- **Automatic refresh**: no manual token handling
+- **Credentials via env vars**: client ID/secret in `.env` (gitignored)
 
 ## ⚙️ Prerequisites
 
