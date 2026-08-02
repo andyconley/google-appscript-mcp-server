@@ -36,3 +36,15 @@ test('isTokenExpired honors the buffer', () => {
   assert.equal(tm.isTokenExpired({ expires_at: Date.now() - 1000 }), true);
   assert.equal(tm.isTokenExpired({ expires_at: Date.now() + 1_000_000 }), false);
 });
+
+test('_computeExpiresAt normalizes across token shapes (never NaN/null)', () => {
+  const tm = new TokenManager();
+  // googleapis OAuth2 client returns absolute expiry_date
+  assert.equal(tm._computeExpiresAt({ expiry_date: 123 }), 123);
+  // raw token endpoint returns expires_in (seconds)
+  const fromExpiresIn = tm._computeExpiresAt({ expires_in: 3600 });
+  assert.ok(fromExpiresIn > Date.now(), 'expires_in -> future ms');
+  // neither present (the bug that produced NaN) -> finite ~1h fallback
+  const fallback = tm._computeExpiresAt({});
+  assert.ok(Number.isFinite(fallback) && fallback > Date.now());
+});
