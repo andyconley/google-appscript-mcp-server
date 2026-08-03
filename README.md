@@ -19,6 +19,7 @@ An MCP (Model Context Protocol) server for the Google Apps Script API. Manage sc
 
 - [Overview](#overview)
 - [What This Fork Adds](#-what-this-fork-adds)
+- [Guides](#-guides)
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Quick Start Guide](#quick-start-guide)
@@ -60,6 +61,10 @@ This fork keeps the full upstream toolset and adds the following. See the [fork 
 **Operational**
 - `bin/restart-dev.sh` — restart helper for core changes.
 - SSE mode now binds to `127.0.0.1` by default (override with `SSE_HOST`) because the SSE endpoints are unauthenticated.
+
+## 📚 Guides
+
+- [Deploy an interactive HTML page as a web app](docs/deploy-html-web-app.md) — point any MCP client (Claude, Codex, VS Code/Cline, …) at this server and publish a self-contained HTML page to a live `/exec` URL.
 
 ## 🎥 Demo Video
 
