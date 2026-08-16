@@ -18,15 +18,15 @@ module.exports = {
         preset: "conventionalcommits",
         presetConfig: {
           types: [
-            { type: "feat", section: "Features", hidden: false },
-            { type: "fix", section: "Bug Fixes", hidden: false },
-            { type: "docs", section: "Documentation", hidden: false },
-            { type: "perf", section: "Performance", hidden: false },
-            { type: "refactor", section: "Code Refactoring", hidden: false },
-            { type: "test", section: "Tests", hidden: false },
-            { type: "build", section: "Build System", hidden: false },
-            { type: "ci", section: "Continuous Integration", hidden: false },
-            { type: "chore", section: "Maintenance", hidden: true }
+            { type: "feat", section: "Features", effect: "bump" },
+            { type: "fix", section: "Bug Fixes", effect: "bump" },
+            { type: "docs", section: "Documentation", effect: "changelog" },
+            { type: "perf", section: "Performance", effect: "bump" },
+            { type: "refactor", section: "Code Refactoring", effect: "changelog" },
+            { type: "test", section: "Tests", effect: "changelog" },
+            { type: "build", section: "Build System", effect: "changelog" },
+            { type: "ci", section: "Continuous Integration", effect: "changelog" },
+            { type: "chore", section: "Maintenance", effect: "hidden" }
           ]
         }
       }
