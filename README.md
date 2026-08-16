@@ -69,6 +69,7 @@ This fork keeps the full upstream toolset and adds the following. See the [fork 
 ## Releases
 
 Releases are generated from Conventional Commits on `main`. The release workflow updates `CHANGELOG.md`, bumps `package.json` and `package-lock.json`, tags the release, and publishes GitHub release notes. This fork does not publish to npm.
+Documentation-only releases should still point readers at the changed setup, tool, or operational guidance.
 
 ## 🎥 Demo Video
 
