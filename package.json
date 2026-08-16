@@ -1,6 +1,6 @@
 {
   "name": "google-appscript-mcp-server",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "MCP server for the Google Apps Script API. Fork of mohalmah/google-appscript-mcp-server with OAuth/stdio/error-contract fixes and added web-app publish + project-discovery capabilities.",
   "main": "index.js",
   "type": "module",
