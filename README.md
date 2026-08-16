@@ -66,6 +66,10 @@ This fork keeps the full upstream toolset and adds the following. See the [fork 
 
 - [Deploy an interactive HTML page as a web app](docs/deploy-html-web-app.md) — point any MCP client (Claude, Codex, VS Code/Cline, …) at this server and publish a self-contained HTML page to a live `/exec` URL.
 
+## Releases
+
+Releases are generated from Conventional Commits on `main`. The release workflow updates `CHANGELOG.md`, bumps `package.json` and `package-lock.json`, tags the release, and publishes GitHub release notes. This fork does not publish to npm.
+
 ## 🎥 Demo Video
 
 ![Google Apps Script MCP Server Demo](https://github.com/andyconley/google-appscript-mcp-server/blob/main/demo/google%20app%20script%20mcp%20demo.gif?raw=true)
